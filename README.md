@@ -3,6 +3,7 @@
 
 
 =Intro= 
+
 In a nutshell the project is about SaaS company that provides a platform to SaaS companies. The platform is API first, which means there is no graphical interface. 
 
 
@@ -14,6 +15,7 @@ customers to their accounts. Customers need to be registered with classical bill
 information as well.
 
 =How does it work: Quotes, Subscriptions, Invoices = 
+
 The platform only allows companies to sell subscriptions-type products: companies customers sign-up for one or multiple monthly subscriptions that are due each month (think Spotify, Microsoft Office 365, Adobe Creative Cloud, Amazon Prime, Google One, etc). Your platform does not provide solutions for one-off purchases.
 The platform enables companies to quickly create quotes for their customers. A quote contains one or more line items, representing:
 
