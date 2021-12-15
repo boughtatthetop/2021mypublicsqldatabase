@@ -11,7 +11,7 @@ app = FastAPI()
 def root():
   return {"message": "It works !"}
 
-#----------------------------------------------------REQUIREMENT NUMBER 1 = COMPANY CREATE ACCOUNT -------------------------------------------- 
+#------------------------------REQUIREMENT NUMBER 1 = COMPANY CREATE ACCOUNT -------------------------------------------- 
 
 @app.post("/create_company_account")
 async def create_company_account(payload: Request):
@@ -54,7 +54,7 @@ async def create_company_account(payload: Request):
   dbase.close()
   return True
 
-#-----------------------------------------------------------------------------REQUIREMENT NUMBER 2 = CUSTOMER CREATES ACCOUNT----------------------------
+#---------------------------------------------REQUIREMENT NUMBER 2 = CUSTOMER CREATES ACCOUNT----------------------------
 
 @app.post("/create_customer_account")
 async def create_customer_account(payload: Request):
@@ -110,31 +110,6 @@ async def create_customer_account(payload: Request):
   return "Customer has been registered"
            
 
-
-#@app.post("/add_product")
-#async def create_subscription(payload: Request):
-#  values_dict = await payload.json()
-#  #open DB
-#  dbase = sqlite3.connect('database_group43.db', isolation_level=None)
-#  #TotalPrice calculator 
-#  dbase.execute('''
-#    INSERT INTO Product(
-#    Product_Name,
-#    Product_Currency,
-#    Product_Price,
-#    Company_ID 
-#    VALUES(?,?,?,?)
-#    '''
-#      ,
-#      (
-#       str(values_dict['Product_Name']),
-#       str(values_dict['Product_CurrencyCode']),
-#       str(values_dict['Product_Price']),
-#       str(values_dict['Company_ID'])))
-#  dbase.close()
-#  return True
-  
-
 #-------------------------------------------------REQUIREMENT NUMBER 3 = COMPANY Creates A QUOTE------------------
 
 @app.post("/create_quote")
@@ -144,60 +119,68 @@ async def review_quote(payload: Request):
   dbase = sqlite3.connect('database_group43.db', isolation_level=None)
   
   query_product='''
-                SELECT Product_CurrencyCode, Product_Price
-                FROM Product
-                WHERE Product_Name ={}
+                SELECT Product_ID FROM Product
+                WHERE Product_Name={}
+                AND Product_CurrencyCode={}
+                AND Product_Price ={}
+                AND Company_ID={}
                 '''.format(
-                      Product_Name=str(values_dict['Product_Name']))
-#                      str(values_dict['Product_CurrencyCode']),
-#                      str(values_dict['Customer_Email']))
-    
+                      Product_Name=str(values_dict['Product_Name']),
+                      Product_CurrencyCode=str(values_dict['Product_CurrencyCode']),
+                      Product_Price=str(values_dict['Product_Price']),
+                      Company_ID=str(values_dict['Company_ID']))
+  
   print(query_product)
   dbase.execute(query_product)
-  print(dbase.execute(query_product).fetchall())
-  product_query_result=query_product.fetchall()
-  print(product_query_result)
 
+  target_product_id=dbase.execute(query_product).fetchall()[0][0]
+
+  
+  
+  query_quote='''INSERT INTO Quote(
+                Quote_Quantity,
+                Quote_Date,
+                Product_ID,
+                Customer_ID)
+                VALUES(
+                  ?,?,?,?
+                )''',(
+                  str(values_dict['Quote_Quantity']),
+                  str(values_dict['Quote_Date']),
+                  str(values_dict['Product_ID']),
+                  target_product_id)
                 
-                
-                
-                
-  quote_results=query_product.fetchall()
-  print(quote_results)
-#
-#
-#  dbase.execute(''' 
-#    UPDATE Quote
-#    SET Quote_Quantity = {Acceptance}
-#    WHERE SubscriptionID = {SubscriptionID}  
-#    '''.format(Acceptance = values_dict['Acceptance'], SubscriptionID = values_dict['SubscriptionID']))
+    
+  print(query_quote)
+  dbase.execute(query_quote)
+  print(dbase.execute(query_quote).fetchall())
+  
+   
+
+
   dbase.close()
   return True
 
 
 #--------------------------------------REQUIREMENT NUMBER 4: CUSTOMER ACCEPTS THE QUOTE------------------------
 
-@app.post("/convert_quote")
-async def convert_quote(payload: Request):
+@app.post("/convert_quote_to_subscription")
+async def convert_quote_to_subscription(payload: Request):
   values_dict = await payload.json()
   #open DB
   dbase = sqlite3.connect('database_group43.db', isolation_level=None)                                         
   
   dbase.execute(''' 
-      UPDATE Subscriptions
-      SET Active = 1
-      WHERE SubscriptionID = {SubscriptionID}  
+      UPDATE Subscription
+      SET Subscription_Active = 1
+      WHERE Quote_ID = {Quote_ID}
+      AND Customer_ID={Customer_ID}  
       '''.format(
-        SubscriptionID = values_dict["SubscriptionID"]))
+        Customer_ID = values_dict["SubscriptionID"]))
   dbase.close()
   return True
 
-#Create invoice payload example
-#{ 
-#  "CustomerAccountID": "1",
-#  "InvoiceDate": "2022-01-31",
-#  "CompanyID": "1"                                                       
-#}
+
 @app.post("/create_invoice")
 async def create_invoice(payload: Request):
   values_dict = await payload.json()
