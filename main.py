@@ -2,6 +2,7 @@ import sqlite3
 from sqlite3.dbapi2 import connect
 from fastapi import FastAPI, Request
 import uvicorn
+import LUHN as L
 
 app = FastAPI()
 
@@ -67,10 +68,24 @@ async def create_customer_account(payload: Request):
     ''',(str(values_dict['Customer_Email']),))
   query_email=(customers_with_this_email.fetchall())
   print(query_email)
-  print(str(values_dict['Customer_Email']))
+  print("Customer email is "+ str(values_dict['Customer_Email']))
   if query_email:
-    return "error"
-  
+    return "Customer email has been already registered"
+  else:
+    print("Registering the Customer...")
+    print("Checking Credit Card number...")
+
+  print(str(values_dict['Customer_CCNumber']))
+  print(L.Luhn(str(values_dict['Customer_CCNumber'])))
+
+  if L.Luhn(str(values_dict['Customer_CCNumber']))==False:
+    return "error in CCNumber"
+
+
+
+
+
+
   dbase.execute('''
         INSERT INTO Customer(
         Customer_Email,
@@ -97,7 +112,7 @@ async def create_customer_account(payload: Request):
           str(values_dict['Customer_AddressPostCode']),
           str(values_dict['Customer_CCNumber'])))
   dbase.close()
-  return True
+  return "Customer has been registered"
            
   # Create new customer account 
 #  query_Customer = dbase.execute('''

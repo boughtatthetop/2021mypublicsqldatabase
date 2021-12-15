@@ -23,7 +23,7 @@ Content-Type: application/json
 
 
 {
- "Customer_Email"                : "testemail@gmail.com",
+ "Customer_Email"                : "testemail3@gmail.com",
  "Customer_Name"                 : "testname",
  "Customer_Surname"              : "testsurname",
  "Customer_AddressCountry"       : "test countrory",
@@ -32,7 +32,7 @@ Content-Type: application/json
  "Customer_AddressStreet"        : "test street",
  "Customer_AddressNumber"        : "123123 ",
  "Customer_AddressPostCode"      : "1231231",
- "Customer_CCNumber"             : "12312312312312312123"
+ "Customer_CCNumber"             : "56022266748153064"
 }
 ###
 
