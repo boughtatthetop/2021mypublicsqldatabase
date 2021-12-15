@@ -11,7 +11,7 @@ app = FastAPI()
 def root():
   return {"message": "It works !"}
 
-#---REQUIREMENT NUMBER 1 = COMPANY CREATE ACCOUNT 
+#----------------------------------------------------REQUIREMENT NUMBER 1 = COMPANY CREATE ACCOUNT -------------------------------------------- 
 
 @app.post("/create_company_account")
 async def create_company_account(payload: Request):
@@ -54,7 +54,7 @@ async def create_company_account(payload: Request):
   dbase.close()
   return True
 
-#---REQUIREMENT NUMBER 2 = CUSTOMER CREATES ACCOUNT 
+#-----------------------------------------------------------------------------REQUIREMENT NUMBER 2 = CUSTOMER CREATES ACCOUNT----------------------------
 
 @app.post("/create_customer_account")
 async def create_customer_account(payload: Request):
@@ -109,35 +109,8 @@ async def create_customer_account(payload: Request):
   dbase.close()
   return "Customer has been registered"
            
-  # Create new customer account 
-#  query_Customer = dbase.execute('''
-#                            SELECT ID FROM Customer
-#                            WHERE Email = {Email}
-#                            '''.format(Email=str(values_dict['Email'])))
-#  # Store ID with fetchall, found in row 0 col 0
-#  customerID = query_Company.fetchall()[0][0]
-#  dbase.execute('''
-#        INSERT INTO CustomerAccounts(
-#        CompanyID,
-#        CustomerID)
-#        VALUES(
-#            {CompanyID},
-#            {CustomerID})  
-#        '''.format(
-#          CompanyID=str(values_dict['CompanyID']),
-#          CustomerID=str(customerID)))
-  #close DB 
 
 
-#Quote payload example
-#The function's name is "create_subscription" but it's still a quote at this point. It becomes a subscription when Active = 1, in the "convert_quote" section
-#{ 
-#  "CustomerAccountID": "1",
-#  "ProductID":"1",
-#  "Quantity": "2",
-#  "StartDate": "01-01-2022",
-#  "EndDate": "01-01-2023"
-#}
 #@app.post("/add_product")
 #async def create_subscription(payload: Request):
 #  values_dict = await payload.json()
@@ -160,18 +133,11 @@ async def create_customer_account(payload: Request):
 #       str(values_dict['Company_ID'])))
 #  dbase.close()
 #  return True
-#  
+  
 
-#Review quote payload example
-#We assume the customer knows the subscrptionID
-#Acceptance = 2 -> refused
-#Acceptance = 1 -> accepted
-#Acceptance = 0 -> not reviewed yet
-#{ 
-#  "SubscriptionID":"1",
-# "Acceptance":"1"
-#}
-@app.get("/get_quote")
+#-------------------------------------------------REQUIREMENT NUMBER 3 = COMPANY Creates A QUOTE------------------
+
+@app.post("/create_quote")
 async def review_quote(payload: Request):
   values_dict = await payload.json()
   #open DB
