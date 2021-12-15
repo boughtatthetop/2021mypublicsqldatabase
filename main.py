@@ -81,11 +81,6 @@ async def create_customer_account(payload: Request):
   if L.Luhn(str(values_dict['Customer_CCNumber']))==False:
     return "error in CCNumber"
 
-
-
-
-
-
   dbase.execute('''
         INSERT INTO Customer(
         Customer_Email,

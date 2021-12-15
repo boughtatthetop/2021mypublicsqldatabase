@@ -23,7 +23,7 @@ Content-Type: application/json
 
 
 {
- "Customer_Email"                : "testemail3@gmail.com",
+ "Customer_Email"                : "newemailtest@gmail.com",
  "Customer_Name"                 : "testname",
  "Customer_Surname"              : "testsurname",
  "Customer_AddressCountry"       : "test countrory",
