@@ -33,7 +33,7 @@ c.execute('''DROP TABLE IF EXISTS Product''')
 c.execute('''DROP TABLE IF EXISTS CustomerAccounts''')
 c.execute('''DROP TABLE IF EXISTS Quote''')
 c.execute('''DROP TABLE IF EXISTS Subscription''')
-c.execute('''DROP TABLE IF EXISTS Invocie''')
+c.execute('''DROP TABLE IF EXISTS Invoice''')
 c.execute('''DROP TABLE IF EXISTS Payment''')
 print("All tables DROPPED")
 
