@@ -3,6 +3,9 @@ from sqlite3.dbapi2 import connect
 from fastapi import FastAPI, Request
 import uvicorn
 import LUHN as L
+import database_rest_and_creation as reset
+
+
 
 app = FastAPI()
 
@@ -118,12 +121,14 @@ async def review_quote(payload: Request):
   #open DB
   dbase = sqlite3.connect('database_group43.db', isolation_level=None)
   
+
+  #---Filter for product_id using name, currency, price and company 
   query_product='''
                 SELECT Product_ID FROM Product
                 WHERE Product_Name="{Product_Name}"
                 AND Product_CurrencyCode="{Product_CurrencyCode}"
-                AND Product_Price ="{Product_Price}"
-                AND Company_ID="{Company_ID}"
+                AND Product_Price ={Product_Price}
+                AND Company_ID={Company_ID}
                 '''.format(
                       Product_Name=str(values_dict['Product_Name']),
                       Product_CurrencyCode=str(values_dict['Product_CurrencyCode']),
@@ -131,9 +136,42 @@ async def review_quote(payload: Request):
                       Company_ID=str(values_dict['Company_ID']))
   
   print(query_product)
-  dbase.execute(query_product)
+  productid=dbase.execute(query_product).fetchall()[0][0]
+  print(productid)
 
-  target_product_id=dbase.execute(query_product).fetchall()[0][0]
+#--- filter for cusomter_id using the email
+  query_customerid='''
+                SELECT Customer_ID FROM Customer
+                WHERE Customer_Email="{Customer_Email}"
+                '''.format(
+                      Customer_Email=str(values_dict['Customer_Email']))
+  
+  print(query_customerid)
+  customerid=dbase.execute(query_customerid).fetchall()[0][0]
+  print(customerid)
+
+#--- record the quote
+  query_quote='''
+              INSERT INTO Quote(
+                Quote_Quantity,
+                Quote_Date,
+                Product_ID,
+                Customer_ID)
+                VALUES(
+                  {Quote_Quantity},
+                  "{Quote_Date}",
+                  {Product_ID},
+                  {Customer_ID})'''.format(
+                    Quote_Quantity=str(values_dict['Quote_Quantity']),
+                    Quote_Date=str(values_dict['Quote_Date']),
+                    Product_ID=str(productid),
+                    Customer_ID=str(customerid)
+                  )
+  print(query_quote)
+  dbase.execute(query_quote)
+  results_quote=(dbase.execute(query_quote).fetchall())
+  print(results_quote)
+
 
   
   
@@ -322,6 +360,7 @@ async def retrieve_statistics(payload: Request):
     # return json.dumps(active_subscriptions_results
 
   return True
+
 
 
 

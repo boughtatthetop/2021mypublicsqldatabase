@@ -45,8 +45,8 @@ Content-Type: application/json
  "Product_Price"              : "20",
  "Company_ID"                 : "1",
  "Quote_Quantity"             : "2",
- "Quote_Date"                 : "2021-01-02"
-
+ "Quote_Date"                 : "2021-01-02",
+ "Customer_Email"             : "email1@gmail.com"
 }
 
 ###
