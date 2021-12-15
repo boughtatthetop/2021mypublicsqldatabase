@@ -120,14 +120,14 @@ async def review_quote(payload: Request):
   
   query_product='''
                 SELECT Product_ID FROM Product
-                WHERE Product_Name={}
-                AND Product_CurrencyCode={}
-                AND Product_Price ={}
-                AND Company_ID={}
+                WHERE Product_Name="{Product_Name}"
+                AND Product_CurrencyCode="{Product_CurrencyCode}"
+                AND Product_Price ="{Product_Price}"
+                AND Company_ID="{Company_ID}"
                 '''.format(
                       Product_Name=str(values_dict['Product_Name']),
                       Product_CurrencyCode=str(values_dict['Product_CurrencyCode']),
-                      Product_Price=str(values_dict['Product_Price']),
+                      Product_Price =str(values_dict['Product_Price']),
                       Company_ID=str(values_dict['Company_ID']))
   
   print(query_product)
@@ -137,24 +137,24 @@ async def review_quote(payload: Request):
 
   
   
-  query_quote='''INSERT INTO Quote(
-                Quote_Quantity,
-                Quote_Date,
-                Product_ID,
-                Customer_ID)
-                VALUES(
-                  ?,?,?,?
-                )''',(
-                  str(values_dict['Quote_Quantity']),
-                  str(values_dict['Quote_Date']),
-                  str(values_dict['Product_ID']),
-                  target_product_id)
-                
-    
-  print(query_quote)
-  dbase.execute(query_quote)
-  print(dbase.execute(query_quote).fetchall())
-  
+#  query_quote='''INSERT INTO Quote(
+#                Quote_Quantity,
+#                Quote_Date,
+#                Product_ID,
+#                Customer_ID)
+#                VALUES(
+#                  ?,?,?,?
+#                )''',(
+#                  str(values_dict['Quote_Quantity']),
+#                  str(values_dict['Quote_Date']),
+#                  str(values_dict['Product_ID']),
+#                  target_product_id)
+#                
+#    
+#  print(query_quote)
+#  dbase.execute(query_quote)
+#  print(dbase.execute(query_quote).fetchall())
+#  
    
 
 
