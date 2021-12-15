@@ -1,9 +1,9 @@
 import requests
 #
-#APIKEY     c41e6b0266369b7430b1b007
+#APIKEY     YOURAPIKEY
 
 
-url = 'https://v6.exchangerate-api.com/v6/c41e6b0266369b7430b1b007/pair/EUR/{}/{}'
+url = 'https://v6.exchangerate-api.com/v6/YOURAPIKEY/pair/EUR/{}/{}'
 
 def converter(currency,amountUSD):
     amountconverter= requests.get(url.format(currency,amountUSD)).json()
@@ -13,7 +13,7 @@ def converter(currency,amountUSD):
 #EURamount=converter("USD",'1')
 #print('EUR '+ str(EURamount))
 
-#print(requests.get('https://v6.exchangerate-api.com/v6/c41e6b0266369b7430b1b007/pair/EUR/USD/123132.3123123').json()['conversion_result'])
+#print(requests.get('https://v6.exchangerate-api.com/v6/YOURAPIKEY/pair/EUR/USD/123132.3123123').json()['conversion_result'])
 
 
 
