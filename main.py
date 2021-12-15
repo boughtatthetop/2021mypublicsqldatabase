@@ -13,6 +13,19 @@ app = FastAPI()
 def root():
   return {"message": "It works !"}
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 #------------------------------REQUIREMENT NUMBER 1 = COMPANY CREATE ACCOUNT -------------------------------------------- 
 
 @app.post("/create_company_account")
@@ -55,6 +68,17 @@ async def create_company_account(payload: Request):
 #
   dbase.close()
   return True
+
+
+
+
+
+
+
+
+
+
+
 
 #---------------------------------------------REQUIREMENT NUMBER 2 = CUSTOMER CREATES ACCOUNT----------------------------
 
@@ -111,6 +135,17 @@ async def create_customer_account(payload: Request):
   dbase.close()
   return "Customer has been registered"
            
+
+
+
+
+
+
+
+
+
+
+
 
 #-------------------------------------------------REQUIREMENT NUMBER 3 = COMPANY Creates A QUOTE------------------
 
@@ -183,8 +218,27 @@ async def review_quote(payload: Request):
   last_quoate_print=dbase.execute(last_quote).fetchall()
   print(last_quoate_print)
 
+  VAT=float(values_dict['Product_Price'])*0.21
+  print(VAT)
+  VAT_Excluded=float(values_dict['Product_Price'])
+  VAT_Included=float(values_dict['Product_Price'])*1.21
+
+
+
   dbase.close()
-  return "Quote_ID, Quote_Quantity,Quote_Date, Product_ID, Customer_ID = " + str(last_quoate_print)
+  return last_quoate_print,VAT_Included,VAT_Excluded
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 #-----------REQUIREMENT NUMBER 4: CUSTOMER ACCEPTS THE QUOTE------------------------
