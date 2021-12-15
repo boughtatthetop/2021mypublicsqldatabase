@@ -3,7 +3,6 @@ from sqlite3.dbapi2 import connect
 from fastapi import FastAPI, Request
 import uvicorn
 import LUHN as L
-import database_rest_and_creation as reset
 
 
 
@@ -136,8 +135,15 @@ async def review_quote(payload: Request):
                       Company_ID=str(values_dict['Company_ID']))
   
   print(query_product)
+  test_query=dbase.execute(query_product).fetchall()
+  print(test_query)
+  #if test_query:
+  #  return "Company doesn't have that product"
+  #  
+  #else:
   productid=dbase.execute(query_product).fetchall()[0][0]
-  print(productid)
+  print("productid = " + str(productid))
+
 
 #--- filter for cusomter_id using the email
   query_customerid='''
@@ -147,6 +153,8 @@ async def review_quote(payload: Request):
                       Customer_Email=str(values_dict['Customer_Email']))
   
   print(query_customerid)
+  print_query_customer_if_list=dbase.execute(query_customerid).fetchall()
+  print(print_query_customer_if_list)
   customerid=dbase.execute(query_customerid).fetchall()[0][0]
   print(customerid)
 
@@ -168,53 +176,71 @@ async def review_quote(payload: Request):
                     Customer_ID=str(customerid)
                   )
   print(query_quote)
-  dbase.execute(query_quote)
   results_quote=(dbase.execute(query_quote).fetchall())
   print(results_quote)
 
-
-  
-  
-#  query_quote='''INSERT INTO Quote(
-#                Quote_Quantity,
-#                Quote_Date,
-#                Product_ID,
-#                Customer_ID)
-#                VALUES(
-#                  ?,?,?,?
-#                )''',(
-#                  str(values_dict['Quote_Quantity']),
-#                  str(values_dict['Quote_Date']),
-#                  str(values_dict['Product_ID']),
-#                  target_product_id)
-#                
-#    
-#  print(query_quote)
-#  dbase.execute(query_quote)
-#  print(dbase.execute(query_quote).fetchall())
-#  
-   
-
+  last_quote='''SELECT * FROM Quote ORDER BY Quote_ID DESC LIMIT 1'''
+  last_quoate_print=dbase.execute(last_quote).fetchall()
+  print(last_quoate_print)
 
   dbase.close()
-  return True
+  return "Quote_ID, Quote_Quantity,Quote_Date, Product_ID, Customer_ID = " + str(last_quoate_print)
 
 
-#--------------------------------------REQUIREMENT NUMBER 4: CUSTOMER ACCEPTS THE QUOTE------------------------
+#-----------REQUIREMENT NUMBER 4: CUSTOMER ACCEPTS THE QUOTE------------------------
 
-@app.post("/convert_quote_to_subscription")
+@app.post("/accept_quote")
 async def convert_quote_to_subscription(payload: Request):
   values_dict = await payload.json()
   #open DB
   dbase = sqlite3.connect('database_group43.db', isolation_level=None)                                         
   
-  dbase.execute(''' 
-      UPDATE Subscription
-      SET Subscription_Active = 1
-      WHERE Quote_ID = {Quote_ID}
-      AND Customer_ID={Customer_ID}  
+  get_quote=''' 
+      SELECT Quote_ID FROM Quote 
+      WHERE Customer_ID={Customer_ID}
+      AND Product_ID={Product_ID}
       '''.format(
-        Customer_ID = values_dict["SubscriptionID"]))
+        Customer_ID = str(values_dict["Customer_ID"]),
+        Product_ID=str(values_dict["Product_ID"]))
+  print(get_quote)
+  quoteid=dbase.execute(get_quote).fetchall()[0][0]
+
+  print(quoteid)
+
+
+
+
+
+
+
+  update_sub='''
+      INSERT INTO Subscription(
+      Quote_ID,
+      Customer_ID
+      )
+      VALUES(
+      {Quote_ID},
+      {Customer_ID}
+      )
+    '''.format(
+        Quote_ID=str(quoteid),
+        Customer_ID=str(values_dict["Customer_ID"])
+    )
+  dbase.execute(update_sub)
+  accept_quote='''
+      UPDATE Subscription 
+      SET Subscription_Active = 1 
+      WHERE Quote_ID = {Quote_ID}
+      AND Customer_ID = {Customer_ID}      
+      '''.format( 
+        Quote_ID=str(quoteid),
+        Customer_ID=str(values_dict["Customer_ID"])
+      )
+  print(accept_quote)
+  dbase.execute(accept_quote)
+
+
+
   dbase.close()
   return True
 
