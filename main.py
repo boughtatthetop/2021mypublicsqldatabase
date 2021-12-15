@@ -10,22 +10,6 @@ app = FastAPI()
 def root():
   return {"message": "It works !"}
 
-#Company payload example
-#{ 
-# "Name"            :   "Meta",
-# "AddressCountry"  :   "USA",
-# "AddressState"    :   "LA",
-# "AddressCity"     :   "sillicon valley",
-# "AddressStreet"   :   "Beautiful Street",
-# "AddressNumber"   :   "546",
-# "AddressPostCode" :   "10200",
-# "Company_VATID"   :   "2131231434123",
-# "BankAccName"     :   "MetaCorp",
-# "BankAccNumber"   :   "1225345345345"
-#}
-
-#---function allows companies to create an account and record their information if they already doesn't have an account 
-
 #---REQUIREMENT NUMBER 1 = COMPANY CREATE ACCOUNT 
 
 @app.post("/create_company_account")
@@ -41,11 +25,6 @@ async def create_company_account(payload: Request):
   print(str(values_dict['Company_VATID']))
   if query_vatid:
     return "error"
-#  vat=companies_with_this_vat.fetchall()[0][0]
-#  print(vat)
-#
-#  if vat==values_dict['Company_VATID']:
-#    return 'error'
 
   aaaa=dbase.execute('''INSERT INTO Company(
                       Company_Name,
@@ -74,37 +53,24 @@ async def create_company_account(payload: Request):
   dbase.close()
   return True
 
-#dbase = sqlite3.connect('database_group43.db', isolation_level=None)
-#print(dbase.execute('''SELECT * FROM Comapny'''.fetchall()))
-#dbase.close()
-
-
-#Customer payload example
-#{ 
-#  "Customer_Email" : "gmail1@gmail.com",
-#  "Customer_Name": "Bond",
-#  "Customer_Surname":"James",
-#  "Customer_Customer_Birthdate"
-#  "Customer_Email":"james.bond@gmail.com",
-#  "Customer_AddressCountry":"USA",
-#  "Customer_AddressState": "Statexyz",
-#  "Customer_AddressCity": "Cityxyz",
-#  "Customer_AddressStreet": "Streetxyz",
-#  "Customer_AddressNumber": "101",
-#  "Customer_AddressPostCode": "1020",
-#  "Customer_CCNumber": "2233 4455 6677 8899",
-#}
-
-#---function allows customers to create an account and record their information if they already doesn't have an account 
-
 #---REQUIREMENT NUMBER 2 = CUSTOMER CREATES ACCOUNT 
-
 
 @app.post("/create_customer_account")
 async def create_customer_account(payload: Request):
   values_dict = await payload.json()
   #open DB 
   dbase = sqlite3.connect('database_group43.db', isolation_level=None)
+  
+  customers_with_this_email=dbase.execute('''
+    SELECT Customer_ID FROM Customer
+    WHERE Customer_Email=?
+    ''',(str(values_dict['Customer_Email']),))
+  query_email=(customers_with_this_email.fetchall())
+  print(query_email)
+  print(str(values_dict['Customer_Email']))
+  if query_email:
+    return "error"
+  
   dbase.execute('''
         INSERT INTO Customer(
         Customer_Email,

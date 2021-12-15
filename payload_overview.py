@@ -1,14 +1,14 @@
 #Company payload example
 { 
-  "Name": "Meta",
-  "AddressCountry":"USA",
-  "AddressState": "LA",
-  "AddressCity": "sillicon valley",
-  "AddressStreet": "Beautiful Street",
-  "AddressNumber": "546",
-  "AddressPostCode": "10200",
-  "VATID": "2131231434123",
-  "BankAcc": "1225345345345"
+  "_Name": "Meta",
+  "_AddressCountry":"USA",
+  "_AddressState": "LA",
+  "_AddressCity": "sillicon valley",
+  "_AddressStreet": "Beautiful Street",
+  "_AddressNumber": "546",
+  "_AddressPostCode": "10200",
+  "_VATID": "2131231434123",
+  "_BankAcc": "1225345345345"
 }
 
 #Customer payload example
