@@ -134,8 +134,29 @@ async def create_customer_account(payload: Request):
           str(values_dict['Customer_CCNumber'])))
   dbase.close()
   return "Customer has been registered"
-           
 
+
+
+@app.get("/see_customer_account")
+async def see_customer_account(payload: Request):
+  values_dict = await payload.json()
+  #open DB 
+  dbase = sqlite3.connect('database_group43.db', isolation_level=None)   
+
+  customer_records='''
+    SELECT Customer.Customer_Name, Customer.Customer_Surname
+    FROM Customer
+    WHERE Customer_Email = "{a}"
+    '''.format(a=str(values_dict['Customer_Email'])
+    )
+  print(customer_records)
+  dbase.execute(customer_records)
+  print(dbase.execute(customer_records).fetchall())
+  print(customer_records)
+  a = (dbase.execute(customer_records).fetchall())
+
+  dbase.close()
+  return a
 
 
 
@@ -301,44 +322,81 @@ async def convert_quote_to_subscription(payload: Request):
   return True
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#-------------------------Customer requests to see Inovice 
+
 @app.post("/create_invoice")
 async def create_invoice(payload: Request):
   values_dict = await payload.json()
   #open DB
   dbase = sqlite3.connect('database_group43.db', isolation_level=None)
-  query_subscriptions = dbase.execute('''
-                            SELECT TotalPriceLocalVATI FROM Subscriptions
-                            WHERE Active = 1 AND CustomerAccountID = {CustomerAccountID} AND {InvoiceDate} BETWEEN StartDate AND EndDate
-                            '''.format(CustomerAccountID=values_dict['CustomerAccountID']), InvoiceDate=str(values_dict['InvoiceDate']))
-  subscriptions_results = query_subscriptions.fetchall()
-  
-  TotalDueEuro = 0
-  for subscription in subscriptions_results:
-    TotalDueEuro += subscription[0]
+  query_active_subs ='''
+                            SELECT Subscription.Customer_ID, Quote.Quote_ID 
+                            FROM Subscription
+                            LEFT JOIN Quote ON Quote.Quote_ID=Subscription.Quote_ID
+                            WHERE Subscription_Active = 1 
+                            AND Customer_ID = {Customer_ID}
+                            '''.format(Customer_ID=values_dict['Customer_ID'])
+  print(query_active_subs)
+  a=dbase.execute(query_active_subs).fetchall()
+  print(a)
+  print(str(a))
+
+
+
+
   #We assumed DueDate to be 30 days after the invoice date
-  dbase.execute('''
-    INSERT INTO Invoices(
-      InvoiceDate,
-      DueDate,
-      TotalDueEuro,
-      CompanyID)
-      VALUES(
-        {InvoiceDate},
-        DATE({InvoiceDate2},'+30 days'),
-        {TotalDueEuro},
-        CompanyID)
-        '''.format(
-          InvoiceDate=str(values_dict['InvoiceDate']),
-          InvoiceDate2=str(values_dict['InvoiceDate']),
-          TotalDueEuro=TotalDueEuro),
-          CompanyID=str(values_dict['CompanyID']))     
+#  dbase.execute('''
+#    INSERT INTO Invoices(
+#      InvoiceDate,
+#      DueDate,
+#      TotalDueEuro,
+#      CompanyID)
+#      VALUES(
+#        {InvoiceDate},
+#        DATE({InvoiceDate2},'+30 days'),
+#        {TotalDueEuro},
+#        CompanyID)
+#        '''.format(
+#          InvoiceDate=str(values_dict['InvoiceDate']),
+#          InvoiceDate2=str(values_dict['InvoiceDate']),
+#          TotalDueEuro=TotalDueEuro),
+#          CompanyID=str(values_dict['CompanyID']))     
   dbase.close()     
   return True
 
-#Check invoices payload example
-#{ 
-#  "CustomerAccountID": "1"
-#}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 @app.get("/check_invoices")
 async def check_invoices(payload: Request):
   values_dict = await payload.json()
