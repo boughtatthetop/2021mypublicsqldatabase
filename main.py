@@ -137,27 +137,6 @@ async def create_customer_account(payload: Request):
 
 
 
-@app.get("/see_customer_account")
-async def see_customer_account(payload: Request):
-  values_dict = await payload.json()
-  #open DB 
-  dbase = sqlite3.connect('database_group43.db', isolation_level=None)   
-
-  customer_records='''
-    SELECT Customer.Customer_Name, Customer.Customer_Surname
-    FROM Customer
-    WHERE Customer_Email = "{a}"
-    '''.format(a=str(values_dict['Customer_Email'])
-    )
-  print(customer_records)
-  dbase.execute(customer_records)
-  print(dbase.execute(customer_records).fetchall())
-  print(customer_records)
-  a = (dbase.execute(customer_records).fetchall())
-
-  dbase.close()
-  return a
-
 
 
 
@@ -502,6 +481,84 @@ async def retrieve_statistics(payload: Request):
   return True
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#-------------EXTRA STUFF 
+
+
+@app.get("/see_customer_account")
+async def see_customer_account(payload: Request):
+  values_dict = await payload.json()
+  #open DB 
+  dbase = sqlite3.connect('database_group43.db', isolation_level=None)   
+
+  customer_records='''
+    SELECT Customer.Customer_Name, Customer.Customer_Surname
+    FROM Customer
+    WHERE Customer_Email = "{a}"
+    '''.format(a=str(values_dict['Customer_Email'])
+    )
+  print(customer_records)
+  dbase.execute(customer_records)
+  print(dbase.execute(customer_records).fetchall())
+  print(customer_records)
+  a = (dbase.execute(customer_records).fetchall())
+
+  dbase.close()
+  return a
 
 
 
