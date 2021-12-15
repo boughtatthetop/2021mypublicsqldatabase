@@ -157,9 +157,11 @@ dbase.execute('''
         Subscription_Active         BOOLEAN,
         Quote_ID                    INTEGER,
         Customer_ID                 INTEGER,
+        Product_ID                  INTEGER,
 
         FOREIGN KEY(Quote_ID) REFERENCES Quote(Quote_ID),
-        FOREIGN KEY(Customer_ID)REFERENCES Customer(Customer_ID))    
+        FOREIGN KEY(Customer_ID)REFERENCES Customer(Customer_ID),
+        FOREIGN KEY(Product_ID)REFERENCES Product(Product_ID))    
     ''')
 print("Subscription table created")
 
@@ -479,8 +481,7 @@ for Customer_Email,Customer_Name, Customer_Surname, Customer_Birthdate, Customer
     record_a_new_customer(Customer_Email,Customer_Name, Customer_Surname, Customer_Birthdate, Customer_AddressCountry, Customer_AddressState, Customer_AddressCity, Customer_AddressStreet, Customer_AddressNumber, Customer_AddressPostCode, Customer_CCNumber)
 print('customers imported')
 
-query=dbase.execute('''SELECT * FROM Company''').fetchall()
-print(query)
+
 
 
 #CustomerAccounts population
@@ -539,17 +540,17 @@ for Quote_Quantity, Quote_Date, Product_ID, Customer_ID in Quote_List:
 
 
 Subscription_List=[
-    (1,2,4),
+    (1,2,1),
+    (0,2,2),
+    (1,2,3),
     (0,2,4),
-    (1,2,4),
-    (0,2,4),
-    (1,2,4),
-    (1,2,4),
-    (1,2,4),
-    (1,2,4),
-    (1,2,4),
-    (1,2,4),   
-    (1,2,4)     
+    (1,2,5),
+    (1,2,6),
+    (1,2,7),
+    (1,2,8),
+    (1,2,9),
+    (1,2,10),   
+    (1,2,11)     
 ]
 for Subscription_Active,Quote_Quantity, Customer_ID in Subscription_List:
     Subscription_recorder(Subscription_Active,Quote_Quantity, Customer_ID)
