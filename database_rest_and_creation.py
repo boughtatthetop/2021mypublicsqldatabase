@@ -144,7 +144,7 @@ dbase.execute('''
         Customer_ID                 INTEGER NOT NULL,
         
         FOREIGN KEY(Product_ID) REFERENCES Product(Product_ID),
-        FOREIGN KEY(Quote_ID) REFERENCES Quote(Quote_ID)
+        FOREIGN KEY(Customer_ID) REFERENCES Quote(Customer_ID)
     )    
     ''')
 print("Quote table created")

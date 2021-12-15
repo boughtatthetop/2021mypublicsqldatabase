@@ -144,26 +144,26 @@ async def review_quote(payload: Request):
   dbase = sqlite3.connect('database_group43.db', isolation_level=None)
   
   query_product=dbase.execute('''
-                SELECT Quote_ID FROM Quote
-                WHERE Product_ID = {} AND Customer_ID = {}
-                '''.format(str(values_dict['Product_ID']), str(values_dict['Customer_ID'])))
-  quote_results=query_product.fetchall()[0][0][0]
-
-
-  dbase.execute(''' 
-    UPDATE Quote
-    SET Quote_Quantity = {Acceptance}
-    WHERE SubscriptionID = {SubscriptionID}  
-    '''.format(Acceptance = values_dict['Acceptance'], SubscriptionID = values_dict['SubscriptionID']))
+                SELECT Product_CurrencyCode, Product_Price 
+                FROM Quote
+                WHERE Product_Name =?
+                LEFT JOIN ON Product Quote.Product_ID=Product_ID
+                LEFT JOIN ON Product Quote.Product_ID=Product_ID
+                ''',(str(values_dict['Product_Name'])))
+  quote_results=query_product.fetchall()
+  print(quote_results)
+#
+#
+#  dbase.execute(''' 
+#    UPDATE Quote
+#    SET Quote_Quantity = {Acceptance}
+#    WHERE SubscriptionID = {SubscriptionID}  
+#    '''.format(Acceptance = values_dict['Acceptance'], SubscriptionID = values_dict['SubscriptionID']))
   dbase.close()
   return True
 
 
-#Convert quote payload example
-#{ 
-#  "CompanyID": "1"
-#. "SubscriptionID": "5"
-#}
+
 @app.post("/convert_quote")
 async def convert_quote(payload: Request):
   values_dict = await payload.json()
