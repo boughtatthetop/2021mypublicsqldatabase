@@ -257,8 +257,10 @@ async def convert_quote_to_subscription(payload: Request):
         Customer_ID = str(values_dict["Customer_ID"]),
         Product_ID=str(values_dict["Product_ID"]))
   print(get_quote)
+  
   quoteid=dbase.execute(get_quote).fetchall()[0][0]
-
+  if quoteid==0:
+    return "error"
   print(quoteid)
 
 
