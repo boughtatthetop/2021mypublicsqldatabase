@@ -3,14 +3,14 @@ POST http://127.0.0.1:8000/create_company_account HTTP/1.1
 Content-Type: application/json
 
 { 
- "Company_Name"            :   "testingthi333",
+ "Company_Name"            :   "newcomtest1",
  "Company_AddressCountry"  :   "USA",
  "Company_AddressState"    :   "LA",
  "Company_AddressCity"     :   "sillicon",
  "Company_AddressStreet"   :   "BeautifulStreet",
  "Company_AddressNumber"   :   "546",
  "Company_AddressPostCode" :   "10200",
- "Company_VATID"           :   "a",
+ "Company_VATID"           :   "aaaaa",
  "Company_BankAccName"     :   "MetaCorp",
  "Company_BankAccNumber"   :   "1225345345345"
 }

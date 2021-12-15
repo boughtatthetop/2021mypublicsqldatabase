@@ -33,13 +33,13 @@ async def create_company_account(payload: Request):
   values_dict = await payload.json()
   dbase = sqlite3.connect('database_group43.db', isolation_level=None)
   companies_with_this_vat=dbase.execute('''
-    SELECT Company_VATID FROM Company
+    SELECT Company_ID FROM Company
     WHERE Company_VATID=?
     ''',(str(values_dict['Company_VATID']),))
-  query_vatid=(companies_with_this_vat.fetchall()[0][0])
+  query_vatid=(companies_with_this_vat.fetchall())
   print(query_vatid)
   print(str(values_dict['Company_VATID']))
-  if query_vatid== values_dict['Company_VATID']:
+  if query_vatid:
     return "error"
 #  vat=companies_with_this_vat.fetchall()[0][0]
 #  print(vat)
