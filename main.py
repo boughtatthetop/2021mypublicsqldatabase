@@ -143,13 +143,25 @@ async def review_quote(payload: Request):
   #open DB
   dbase = sqlite3.connect('database_group43.db', isolation_level=None)
   
-  query_product=dbase.execute('''
-                SELECT Product_CurrencyCode, Product_Price 
-                FROM Quote
-                WHERE Product_Name =?
-                LEFT JOIN ON Product Quote.Product_ID=Product_ID
-                LEFT JOIN ON Product Quote.Product_ID=Product_ID
-                ''',(str(values_dict['Product_Name'])))
+  query_product='''
+                SELECT Product_CurrencyCode, Product_Price
+                FROM Product
+                WHERE Product_Name ={}
+                '''.format(
+                      Product_Name=str(values_dict['Product_Name']))
+#                      str(values_dict['Product_CurrencyCode']),
+#                      str(values_dict['Customer_Email']))
+    
+  print(query_product)
+  dbase.execute(query_product)
+  print(dbase.execute(query_product).fetchall())
+  product_query_result=query_product.fetchall()
+  print(product_query_result)
+
+                
+                
+                
+                
   quote_results=query_product.fetchall()
   print(quote_results)
 #
@@ -163,6 +175,7 @@ async def review_quote(payload: Request):
   return True
 
 
+#--------------------------------------REQUIREMENT NUMBER 4: CUSTOMER ACCEPTS THE QUOTE------------------------
 
 @app.post("/convert_quote")
 async def convert_quote(payload: Request):
