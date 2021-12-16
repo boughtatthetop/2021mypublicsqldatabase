@@ -5,7 +5,7 @@ import uvicorn
 import LUHN as L
 import pandas as pd
 import datetime
-   
+import json
 
 app = FastAPI()
 
@@ -80,7 +80,7 @@ async def create_company_account(payload: Request):
    "Company_BankAccNumber"   :               str(values_dict["Company_BankAccNumber"])
   }
 
-
+  print(json.dumps(companyrecorded, indent = 3))
 
 
   dbase.close()
@@ -165,7 +165,7 @@ async def create_customer_account(payload: Request):
    'Customer_CCNumber'        :           str(values_dict['Customer_CCNumber'])     
   }
 
-
+  print(json.dumps(customerrecorder, indent = 3))
 
   print("Customer is now registered")
   return  customerrecorder
@@ -298,7 +298,7 @@ async def review_quote(payload: Request):
   "Customer_Email"             : str(values_dict['Customer_Email'])
   }
 
-
+  print(json.dumps(quote_print, indent = 3))
   dbase.close()
   return quote_print
 
@@ -434,6 +434,7 @@ async def convert_quote_to_subscription(payload: Request):
 
 
   }
+  print(json.dumps(customeraccepted, indent = 3))
 
 
   dbase.close()
@@ -592,9 +593,8 @@ async def create_invoice(payload: Request):
 
   } 
 
-  print(inovicedetails)
-
-
+ 
+  print(json.dumps(inovicedetails, indent = 3))
 
 
   dbase.close()     
@@ -645,24 +645,28 @@ async def update_invoice(payload: Request):
                         WHERE Customer_ID={Customer_ID}
                         AND Subscription_ID={Subscription_ID}
                         AND Invoice_Paid=0
-                        OR Invoice_Paid="NULL"
+                        OR Invoice_Paid=NULL
                         '''.format(
                           Customer_ID=str(values_dict['Customer_ID']),
                           Subscription_ID=str(values_dict['Subscription_ID']))
   print(query_invoice_update)
   a=dbase.execute(query_invoice_update).fetchall()
   print(a)
-  if a==None:
+  if a is None or not a:
     print("Customer doesn't have any pending Invoice")
     return "Customer doesn't have any pending Invoice"
-  elif a[0][0]:
-    print("Customer doesn't have any pending Invoice")
-    return "Customer doesn't have any pending Invoice"
+
 
 
   invoiceid=a[0][0]
-  print(invoiceid)
-  
+  print(invoiceid.json)
+  if invoiceid==None:
+    print("Customer doesn't have any pending Invoice")
+    return "Customer doesn't have any pending Invoice"
+  elif invoiceid:
+    print("Customer doesn't have any pending Invoice")
+    return "Customer doesn't have any pending Invoice"
+
   
   
   
