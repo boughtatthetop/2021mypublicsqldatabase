@@ -3,16 +3,16 @@ POST http://127.0.0.1:8000/create_company_account HTTP/1.1
 Content-Type: application/json
 
 { 
- "Company_Name"            :   "newcomtest1",
- "Company_AddressCountry"  :   "USA",
- "Company_AddressState"    :   "LA",
- "Company_AddressCity"     :   "sillicon",
- "Company_AddressStreet"   :   "BeautifulStreet",
- "Company_AddressNumber"   :   "546",
- "Company_AddressPostCode" :   "10200",
- "Company_VATID"           :   "aaaaa",
- "Company_BankAccName"     :   "MetaCorp",
- "Company_BankAccNumber"   :   "1225345345345"
+ "Company_Name"            :   "Company3",
+ "Company_AddressCountry"  :   "Country3",
+ "Company_AddressState"    :   "State3",
+ "Company_AddressCity"     :   "City3",
+ "Company_AddressStreet"   :   "street3",
+ "Company_AddressNumber"   :   "number3",
+ "Company_AddressPostCode" :   "postcode3",
+ "Company_VATID"           :   "vatid3",
+ "Company_BankAccName"     :   "bank3",
+ "Company_BankAccNumber"   :   "banknumber3"
 }
 ####
 #
@@ -23,19 +23,20 @@ Content-Type: application/json
 
 
 {
- "Customer_Email"                : "newemailtest@gmail.com",
- "Customer_Name"                 : "testname",
- "Customer_Surname"              : "testsurname",
- "Customer_AddressCountry"       : "test countrory",
- "Customer_AddressState"         : "test state",
- "Customer_AddressCity"          : "test city",
- "Customer_AddressStreet"        : "test street",
- "Customer_AddressNumber"        : "123123 ",
- "Customer_AddressPostCode"      : "1231231",
+ "Customer_Email"                : "email3@gmail.com",
+ "Customer_Name"                 : "name4",
+ "Customer_Surname"              : "surname4",
+ "Customer_AddressCountry"       : "country4",
+ "Customer_AddressState"         : "state4",
+ "Customer_AddressCity"          : "city4",
+ "Customer_AddressStreet"        : "street4",
+ "Customer_AddressNumber"        : "number4",
+ "Customer_AddressPostCode"      : "postcode4",
  "Customer_CCNumber"             : "56022266748153064"
 }
 ###
 
+#56022266748153064
 
 
 
@@ -43,13 +44,13 @@ POST http://127.0.0.1:8000/create_quote HTTP/1.1
 Content-Type: application/json
 
 {
- "Product_Name"               : "Office365",
+ "Product_Name"               : "product2",
  "Product_CurrencyCode"       : "EUR",
- "Product_Price"              : "25",
- "Company_ID"                 : "3",
+ "Product_Price"              : "2",
+ "Company_ID"                 : "2",
  "Quote_Quantity"             : "2",
- "Quote_Date"                 : "3003-01-02",
- "Customer_Email"             : "email1@gmail.com"
+ "Quote_Date"                 : "2021-01-02",
+ "Customer_Email"             : "email2@gmail.com"
 }
 
 ###
@@ -60,7 +61,7 @@ Content-Type: application/json
 
 {
  "Product_ID"               : "2",
- "Customer_ID"              : "1"
+ "Customer_ID"              : "2"
 }
 ###
 
@@ -69,7 +70,7 @@ POST http://127.0.0.1:8000/create_invoice HTTP/1.1
 Content-Type: application/json
 
 {
- "Customer_ID"              : "1"
+ "Customer_ID"              : "2"
 }
 ###
 
@@ -80,9 +81,9 @@ POST http://127.0.0.1:8000/update_invoice HTTP/1.1
 Content-Type: application/json
 
 {
- "Customer_ID"              : "4",
- "Subscription_ID"          : "12",
- "Invoice_PaidDate"         : "2031-01-01"
+ "Customer_ID"              : "2",
+ "Subscription_ID"          : "2",
+ "Invoice_PaidDate"         : "2021-01-02"
 }
 ###
 
