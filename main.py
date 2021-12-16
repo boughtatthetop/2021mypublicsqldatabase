@@ -352,33 +352,61 @@ async def convert_quote_to_subscription(payload: Request):
   values_dict = await payload.json()
   #open DB
   dbase = sqlite3.connect('database_group43.db', isolation_level=None)                                         
+  get_companyid=''' 
+      SELECT Quote.Company_ID, Quote.Product_ID FROM Quote 
+      WHERE Quote_ID={Quote_ID}
+      '''.format(
+               Quote_ID=str(values_dict["Quote_ID"]))
+  print(get_companyid)
   
-  get_quote=''' 
-      SELECT Quote_ID FROM Quote 
-      WHERE Customer_ID={Customer_ID}
-      AND Product_ID={Product_ID}
+  comapnyid=dbase.execute(get_companyid).fetchall()[0][0]
+  productid=dbase.execute(get_companyid).fetchall()[0][1]
+  
+
+
+
+
+  insert_into='''
+              INSERT INTO Subscription(Quote_ID,Customer_ID,Company_ID,Product_ID)
+              VALUES({Customer_ID},{Quote_ID},{Company_ID},{Product_ID})
+              '''.format(Customer_ID = str(values_dict["Customer_ID"]),
+        Quote_ID=str(values_dict["Quote_ID"]),
+        Company_ID=str(comapnyid),
+        Product_ID=str(productid))
+  dbase.execute(insert_into)
+
+
+
+
+
+
+
+  get_sub=''' 
+      SELECT Subscription.Subscription_ID FROM Subscription 
+      WHERE Subscription.Customer_ID={Customer_ID}
+      AND Subscription.Quote_ID={Quote_ID}
       '''.format(
         Customer_ID = str(values_dict["Customer_ID"]),
-        Product_ID=str(values_dict["Product_ID"]))
-  print(get_quote)
+        Quote_ID=str(values_dict["Quote_ID"]))
+  print(get_sub)
   
-  a=dbase.execute(get_quote).fetchall()
-  print(a)
-  if len(a)==0:
+  sub=dbase.execute(get_sub).fetchall()
+  print(sub)
+  if len(sub)==0:
     print("This Customer has not recieved a quote to accept on this product")
     return "This Customer has not recieved a quote to accept on this product"
-  elif a[0][0]==None:
+  elif sub[0][0]==None:
     print("This Customer has not recieved a quote to accept on this product")
     return "This Customer has not recieved a quote to accept on this product"
 
-  quoteid=dbase.execute(get_quote).fetchall()[0][0]
-  print(quoteid)
+  sub=dbase.execute(get_sub).fetchall()[0][0]
+  print(sub)
 
   get_companyid=''' 
-      SELECT Company.Company_ID FROM Product 
+      SELECT Product.Company_ID FROM Product 
       WHERE Product_ID={Product_ID}
       '''.format(
-               Product_ID=str(values_dict["Product_ID"]))
+               Product_ID=str(productid))
   print(get_companyid)
   
   comapnyid=dbase.execute(get_companyid).fetchall()[0][0]
@@ -401,24 +429,24 @@ async def convert_quote_to_subscription(payload: Request):
       {Company_ID}
       )
     '''.format(
-        Quote_ID=str(quoteid),
+        Quote_ID=str(values_dict["Quote_ID"]),
         Customer_ID=str(values_dict["Customer_ID"]),
-        Product_ID=str(values_dict["Product_ID"]),
+        Product_ID=str(productid),
         Company_ID=str(comapnyid)
     )
   dbase.execute(update_sub)
-  accept_quote='''
+  accept_sub='''
       UPDATE Subscription 
       SET Subscription_Active = 1 
-      WHERE Quote_ID = {Quote_ID}
+      WHERE Subscription_ID = {Subscription_ID}
       AND Customer_ID = {Customer_ID}      
       '''.format( 
-        Quote_ID=str(quoteid),
+        Subscription_ID=str(sub),
         Customer_ID=str(values_dict["Customer_ID"])
         
       )
-  print(accept_quote)
-  dbase.execute(accept_quote)
+  print(accept_sub)
+  dbase.execute(accept_sub)
   query_name='''SELECT Customer.Customer_Name, Customer.Customer_Surname
                 FROM Customer
                 WHERE Customer_ID="{Customer_ID}"
@@ -447,17 +475,19 @@ async def convert_quote_to_subscription(payload: Request):
               WHERE Product_ID={Product_ID}
               '''.format(
               
-                Product_ID=str(values_dict["Product_ID"]))
+                Product_ID=str(productid))
   product=dbase.execute(query_prduct).fetchall()
   productname=product[0][0]
   productcurrency=product[0][1]
   productprice=product[0][2]      
 
+
+
   query_quote='''
             SELECT Quote_Quantity, Quote_Date
             FROM Quote
             WHERE Quote_ID = {Quote_ID}
-            '''.format(Quote_ID=str(quoteid))
+            '''.format(Quote_ID=str(values_dict["Quote_ID"]))
   quantity=dbase.execute(query_quote).fetchall()[0][0]
   quotedate=dbase.execute(query_quote).fetchall()[0][1]
 

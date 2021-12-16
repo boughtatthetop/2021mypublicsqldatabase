@@ -3,16 +3,16 @@ POST http://127.0.0.1:8000/create_company_account HTTP/1.1
 Content-Type: application/json
 
 { 
- "Company_Name"            :   "Company3",
- "Company_AddressCountry"  :   "Country3",
- "Company_AddressState"    :   "State3",
- "Company_AddressCity"     :   "City3",
- "Company_AddressStreet"   :   "street3",
- "Company_AddressNumber"   :   "number3",
- "Company_AddressPostCode" :   "postcode3",
- "Company_VATID"           :   "vatid3",
- "Company_BankAccName"     :   "bank3",
- "Company_BankAccNumber"   :   "banknumber3"
+ "Company_Name"            :   "Company4",
+ "Company_AddressCountry"  :   "Country4",
+ "Company_AddressState"    :   "State4",
+ "Company_AddressCity"     :   "City4",
+ "Company_AddressStreet"   :   "street4",
+ "Company_AddressNumber"   :   "number4",
+ "Company_AddressPostCode" :   "postcode4",
+ "Company_VATID"           :   "vatid4",
+ "Company_BankAccName"     :   "bank4",
+ "Company_BankAccNumber"   :   "banknumber4"
 }
 ####
 #
@@ -23,15 +23,15 @@ Content-Type: application/json
 
 
 {
- "Customer_Email"                : "email3@gmail.com",
- "Customer_Name"                 : "name3",
- "Customer_Surname"              : "surname3",
- "Customer_AddressCountry"       : "country3",
- "Customer_AddressState"         : "state3",
- "Customer_AddressCity"          : "city3",
- "Customer_AddressStreet"        : "street3",
- "Customer_AddressNumber"        : "number3",
- "Customer_AddressPostCode"      : "postcode3",
+ "Customer_Email"                : "email4@gmail.com",
+ "Customer_Name"                 : "name4",
+ "Customer_Surname"              : "surname4",
+ "Customer_AddressCountry"       : "country4",
+ "Customer_AddressState"         : "state4",
+ "Customer_AddressCity"          : "city4",
+ "Customer_AddressStreet"        : "street4",
+ "Customer_AddressNumber"        : "number4",
+ "Customer_AddressPostCode"      : "postcode4",
  "Customer_CCNumber"             : "56022266748153064"
 }
 ###
@@ -44,13 +44,13 @@ POST http://127.0.0.1:8000/create_quote HTTP/1.1
 Content-Type: application/json
 
 {
- "Product_Name"               : "product3",
- "Product_CurrencyCode"       : "EUR",
- "Product_Price"              : "3",
- "Company_ID"                 : "3",
- "Quote_Quantity"             : "3",
- "Quote_Date"                 : "2021-01-03",
- "Customer_Email"             : "email3@gmail.com"
+ "Product_Name"               : "product4",
+ "Product_CurrencyCode"       : "USD",
+ "Product_Price"              : "4",
+ "Company_ID"                 : "4",
+ "Quote_Quantity"             : "4",
+ "Quote_Date"                 : "2021-01-04",
+ "Customer_Email"             : "email4@gmail.com"
 }
 
 ###
@@ -60,8 +60,8 @@ POST http://127.0.0.1:8000/accept_quote HTTP/1.1
 Content-Type: application/json
 
 {
- "Product_ID"               : "2",
- "Customer_ID"              : "2"
+ "Quote_ID"               : "5",
+ "Customer_ID"              : "3"
 }
 ###
 
@@ -152,7 +152,7 @@ GET http://127.0.0.1:8000/see_customer_account HTTP/1.1
 Content-Type: application/json
 
 {
-    "Customer_Email" : "email1@gmail.com"
+    "Customer_Email" : "email3@gmail.com"
 }
 
 ###
