@@ -3,7 +3,9 @@ from sqlite3.dbapi2 import connect
 from fastapi import FastAPI, Request
 import uvicorn
 import LUHN as L
-
+import pandas as pd
+import datetime
+   
 
 app = FastAPI()
 
@@ -426,7 +428,7 @@ async def convert_quote_to_subscription(payload: Request):
    "Product_Name"            :   str(productname),
   "Product_CurrencyCode"       : str(productcurrency),
   "Product_Price"              : float(productprice),
-  "Product_Price_VAT_Included" :float()*1.21,
+  "Product_Price_VAT_Included" :float(productprice)*1.21,
   "Quote_Quantity"             : int(quantity),
   "Quote_Date"                 : str(quotedate)
 
@@ -494,6 +496,14 @@ async def create_invoice(payload: Request):
   insert_invoice=dbase.execute(query_insert_invoice).fetchall()
   print(insert_invoice)
 
+  query_product_id='''SELECT Product_ID
+                FROM Subscription
+                WHERE Subscription_ID="{Subscription_ID}"
+                '''.format(Subscription_ID=str(subscriptionid))
+  query_product_id_result=dbase.execute(query_product_id).fetchall()
+  productid=query_product_id_result[0][0]
+
+
   query_name='''SELECT Customer.Customer_Name, Customer.Customer_Surname
                 FROM Customer
                 WHERE Customer_ID="{Customer_ID}"
@@ -502,8 +512,93 @@ async def create_invoice(payload: Request):
   name=query_customer_name_surname[0][0]
   surname=query_customer_name_surname[0][1]
 
+  query_name='''SELECT Customer.Customer_Name, Customer.Customer_Surname
+                FROM Customer
+                WHERE Customer_ID="{Customer_ID}"
+                '''.format(Customer_ID=str(values_dict['Customer_ID']))
+  query_customer_name_surname=dbase.execute(query_name).fetchall()
+  name=query_customer_name_surname[0][0]
+  surname=query_customer_name_surname[0][1]
+
+
+
+  customer_email_query='''SELECT Customer_Email FROM Customer 
+                          WHERE Customer_ID={Customer_ID}'''.format(
+                            Customer_ID=str(values_dict['Customer_ID']))
+  customeremail=dbase.execute(customer_email_query).fetchall()[0][0]
+  query_name='''SELECT Customer.Customer_Name, Customer.Customer_Surname
+                FROM Customer
+                WHERE Customer_ID="{Customer_ID}"
+                '''.format(Customer_ID=str(values_dict['Customer_ID']))
+  query_customer_name_surname=dbase.execute(query_name).fetchall()
+  name=query_customer_name_surname[0][0]
+  surname=query_customer_name_surname[0][1]
+
+  query_prduct='''  
+              SELECT Product_Name,Product_CurrencyCode,Product_Price 
+              FROM Product
+              WHERE Product_ID={Product_ID}
+              '''.format(
+              
+                Product_ID=str(productid))
+  product=dbase.execute(query_prduct).fetchall()
+  productname=product[0][0]
+  productcurrency=product[0][1]
+  productprice=product[0][2]  
+
+
+  get_quote=''' 
+      SELECT Quote_ID FROM Quote 
+      WHERE Customer_ID={Customer_ID}
+      AND Product_ID={Product_ID}
+      '''.format(
+        Customer_ID = str(values_dict["Customer_ID"]),
+        Product_ID=str(productid))
+  print(get_quote)
+  
+  a=dbase.execute(get_quote).fetchall()
+  print(a)
+  if len(a)==0:
+    print("This Customer has not recieved a quote to accept on this product")
+    return "This Customer has not recieved a quote to accept on this product"
+  elif a[0][0]==None:
+    print("This Customer has not recieved a quote to accept on this product")
+    return "This Customer has not recieved a quote to accept on this product"
+
+  quoteid=dbase.execute(get_quote).fetchall()[0][0]
+  print(quoteid)
+  query_quote='''
+            SELECT Quote_Quantity, Quote_Date
+            FROM Quote
+            WHERE Quote_ID = {Quote_ID}
+            '''.format(Quote_ID=str(quoteid))
+  quantity=dbase.execute(query_quote).fetchall()[0][0]
+
+  thismonthslastday = pd.Period(pd.Timestamp.today().strftime('%Y-%m-%d'),freq='M').end_time.date() 
+  print(thismonthslastday) 
+  
+  inovicedetails={
+   'Customer_Email'           :   customeremail,            
+   'Customer_Name'            :   name,     
+   'Customer_Surname'         :   surname,     
+   "Product_Name"            :   str(productname),
+  "Product_CurrencyCode"       : str(productcurrency),
+  "Product_Price"              : float(productprice),
+  "Product_Price_VAT_Included" :float(productprice)*1.21,
+  "Total amount"              : float(productprice)*1.21*float(quantity),
+  "Quote_Quantity"             : int(quantity),
+  "Due_Date"                 : str(thismonthslastday)
+
+
+  } 
+
+  print(inovicedetails)
+
+
+
+
   dbase.close()     
-  return "New invoice created for customer  {} {}".format(name,surname)
+  return inovicedetails 
 
 
 
