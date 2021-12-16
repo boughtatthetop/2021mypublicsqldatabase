@@ -1,3 +1,4 @@
+from os import truncate
 import sqlite3
 from sqlite3.dbapi2 import connect
 from fastapi import FastAPI, Request
@@ -578,6 +579,23 @@ async def create_invoice(payload: Request):
   thismonthslastday = pd.Period(pd.Timestamp.today().strftime('%Y-%m-%d'),freq='M').end_time.date() 
   print(thismonthslastday) 
   
+  customer_email_query='''SELECT Customer_Email FROM Customer 
+                          WHERE Customer_ID={Customer_ID}'''.format(
+                            Customer_ID=str(values_dict['Customer_ID']))
+  customeremail=dbase.execute(customer_email_query).fetchall()[0][0]
+
+  query_prduct='''  
+              SELECT Product_Name,Product_CurrencyCode,Product_Price 
+              FROM Product
+              WHERE Product_ID={Product_ID}
+              '''.format(
+              
+                Product_ID=str(values_dict["Product_ID"]))
+  product=dbase.execute(query_prduct).fetchall()
+  productname=product[0][0]
+
+
+
   inovicedetails={
    'Customer_Email'           :   customeremail,            
    'Customer_Name'            :   name,     
@@ -640,32 +658,33 @@ async def update_invoice(payload: Request):
 
 
   query_invoice_update='''
-                        SELECT Invoice.Invoice_ID 
+                        SELECT Invoice.Invoice_ID, Invoice.Invoice_Paid 
                         FROM Invoice
                         WHERE Customer_ID={Customer_ID}
                         AND Subscription_ID={Subscription_ID}
-                        AND Invoice_Paid=0
-                        OR Invoice_Paid=NULL
                         '''.format(
                           Customer_ID=str(values_dict['Customer_ID']),
                           Subscription_ID=str(values_dict['Subscription_ID']))
   print(query_invoice_update)
   a=dbase.execute(query_invoice_update).fetchall()
   print(a)
-  if a is None or not a:
+
+  paidstatusornot=a[0][1]
+
+  if not paidstatusornot:
     print("Customer doesn't have any pending Invoice")
     return "Customer doesn't have any pending Invoice"
+  elif paidstatusornot==1:
+    print('This invoice has already been paid')
+  elif paidstatusornot==0:
+    return True
+  elif paidstatusornot is None:
+    return True
 
 
 
   invoiceid=a[0][0]
-  print(invoiceid.json)
-  if invoiceid==None:
-    print("Customer doesn't have any pending Invoice")
-    return "Customer doesn't have any pending Invoice"
-  elif invoiceid:
-    print("Customer doesn't have any pending Invoice")
-    return "Customer doesn't have any pending Invoice"
+
 
   
   
@@ -681,9 +700,107 @@ async def update_invoice(payload: Request):
   print(query_invoice_update)
   dbase.execute(query_invoice_update)
 
+  query_name='''SELECT Customer.Customer_Name, Customer.Customer_Surname
+                FROM Customer
+                WHERE Customer_ID="{Customer_ID}"
+                '''.format(Customer_ID=str(values_dict['Customer_ID']))
+  query_customer_name_surname=dbase.execute(query_name).fetchall()
+  name=query_customer_name_surname[0][0]
+  surname=query_customer_name_surname[0][1]
+
+
+  query_productid='''SELECT Subscription.Product_ID
+                  FROM Invoice 
+                  LEFT JOIN Subscription ON Subscription.Subscription_ID=Invoice.Subscription_ID
+                  WHERE Subscription.Subscription_ID={Subscription_ID}
+                  '''.format(Subscription_ID=str(values_dict['Subscription_ID']))
+  productid=dbase.execute(query_productid).fetchall()[0][0]
+
+
+
+  query_prduct='''  
+              SELECT Product_Name,Product_CurrencyCode,Product_Price 
+              FROM Product
+              WHERE Product_ID={Product_ID}
+              '''.format(
+              
+                Product_ID=str(productid))
+  product=dbase.execute(query_prduct).fetchall()
+  productname=product[0][0]
+
+  get_quote=''' 
+      SELECT Quote_ID FROM Quote 
+      WHERE Customer_ID={Customer_ID}
+      AND Product_ID={Product_ID}
+      '''.format(
+        Customer_ID = str(values_dict["Customer_ID"]),
+        Product_ID=str(productid))
+  print(get_quote)
+
+
+  productcurrency=product[0][1]
+  productprice=product[0][2]  
+  quoteid=dbase.execute(get_quote).fetchall()[0][0]
+  print(quoteid)
+  query_quote='''
+            SELECT Quote_Quantity, Quote_Date
+            FROM Quote
+            WHERE Quote_ID = {Quote_ID}
+            '''.format(Quote_ID=str(quoteid))
+  quantity=dbase.execute(query_quote).fetchall()[0][0]
+  thismonthslastday = (pd.Timestamp.today()).date() 
+  print(thismonthslastday) 
+
+  query_invoice_status='''
+                        SELECT Invoice_Paid
+                        FROM Invoice
+                        Invoice_PaidDate="{Invoice_PaidDate}"
+                        WHERE Invoice_ID={Invoice_ID}
+                        '''.format(
+                          Invoice_PaidDate=str(values_dict['Invoice_PaidDate']),
+                          Invoice_ID=str(invoiceid))
+  print(query_invoice_status)
+  dbase.execute(query_invoice_status)
+  invoicestate=dbase.execute(query_invoice_status)[0][0]
+  print(invoicestate)
+
+  if invoicestate is None:
+    print("Invoice number {} has not been paid".format(invoiceid))
+    invoicepaidyes=invoicestate
+  elif not invoicestate:
+    print(" This customer invoice does not exists") 
+  elif invoicestate==1:
+    invoicepaidyes=invoicestate
+    print("The invoice has been paid")
+
+
+
+
+  paidinvoice={
+   'Customer_Email'           :   customeremail,            
+   'Customer_Name'            :   name,     
+   'Customer_Surname'         :   surname,     
+   "Product_Name"            :   str(productname),
+    "Product_CurrencyCode"       : str(productcurrency),
+    "Product_Price"              : float(productprice),
+    "Product_Price_VAT_Included" :float(productprice)*1.21,
+    "Total amount"              : float(productprice)*1.21*float(quantity),
+    "Quote_Quantity"             : int(quantity),
+    "Paid_Date"                 : str(thismonthslastday),
+    "Paid status"         : str(invoicepaidyes)
+
+
+
+  } 
+
+ 
+  print(json.dumps(paidinvoice, indent = 3))
+
+
+
 
   dbase.close()
-  return True
+  return paidinvoice
 
 
 

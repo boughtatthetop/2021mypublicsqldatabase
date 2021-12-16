@@ -81,9 +81,9 @@ POST http://127.0.0.1:8000/update_invoice HTTP/1.1
 Content-Type: application/json
 
 {
- "Customer_ID"              : "2",
- "Subscription_ID"          : "2",
- "Invoice_PaidDate"         : "2021-01-02"
+ "Customer_ID"              : "1",
+ "Subscription_ID"          : "1",
+ "Invoice_PaidDate"         : "2021-01-01"
 }
 ###
 
