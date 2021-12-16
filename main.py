@@ -5,7 +5,6 @@ import uvicorn
 import LUHN as L
 
 
-
 app = FastAPI()
 
 # Router
@@ -40,7 +39,8 @@ async def create_company_account(payload: Request):
   print(query_vatid)
   print(str(values_dict['Company_VATID']))
   if query_vatid:
-    return "error"
+    print("Company is already registered")
+    return "Company is already registered"
 
   aaaa=dbase.execute('''INSERT INTO Company(
                       Company_Name,
@@ -65,9 +65,24 @@ async def create_company_account(payload: Request):
                           str(values_dict["Company_BankAccName"]),
                           str(values_dict["Company_BankAccNumber"])))
   
-#
+  companyrecorded={
+  "Company_Name": str(values_dict["Company_Name"]), 
+   "Company_AddressCountry":   str(values_dict["Company_AddressCountry"]), 
+   "Company_AddressState"  :  str(values_dict["Company_AddressState"]),
+   "Company_AddressCity"     :             str(values_dict["Company_AddressCity"]),
+   "Company_AddressStreet"   :               str(values_dict["Company_AddressStreet"]),
+   "Company_AddressNumber"   :               str(values_dict["Company_AddressNumber"]),
+   "Company_AddressPostCode" :                 str(values_dict["Company_AddressPostCode"]),
+   "Company_VATID"        :               str(values_dict["Company_VATID"]),                   
+   "Company_BankAccName"   :               str(values_dict["Company_BankAccName"]),
+   "Company_BankAccNumber"   :               str(values_dict["Company_BankAccNumber"])
+  }
+
+
+
+
   dbase.close()
-  return True
+  return companyrecorded
 
 
 
@@ -105,7 +120,8 @@ async def create_customer_account(payload: Request):
   print(L.Luhn(str(values_dict['Customer_CCNumber'])))
 
   if L.Luhn(str(values_dict['Customer_CCNumber']))==False:
-    return "error in CCNumber"
+    print("Credit card number is not valid")
+    return "Credit card number is not valid"
 
   dbase.execute('''
         INSERT INTO Customer(
@@ -133,7 +149,24 @@ async def create_customer_account(payload: Request):
           str(values_dict['Customer_AddressPostCode']),
           str(values_dict['Customer_CCNumber'])))
   dbase.close()
-  return "Customer has been registered"
+
+  customerrecorder={
+   'Customer_Email'           :           str(values_dict['Customer_Email']),            
+   'Customer_Name'            :           str(values_dict['Customer_Name']),     
+   'Customer_Surname'         :           str(values_dict['Customer_Surname']),   
+   'Customer_AddressCountry'  :           str(values_dict['Customer_AddressCountry']),               
+   'Customer_AddressState'    :           str(values_dict['Customer_AddressState']),           
+   'Customer_AddressCity'     :           str(values_dict['Customer_AddressCity']),       
+   'Customer_AddressStreet'   :           str(values_dict['Customer_AddressStreet']),        
+   'Customer_AddressNumber'   :           str(values_dict['Customer_AddressNumber']),            
+   'Customer_AddressPostCode' :           str(values_dict['Customer_AddressPostCode']),                
+   'Customer_CCNumber'        :           str(values_dict['Customer_CCNumber'])     
+  }
+
+
+
+  print("Customer is now registered")
+  return  customerrecorder
 
 
 
@@ -154,7 +187,32 @@ async def review_quote(payload: Request):
   values_dict = await payload.json()
   #open DB
   dbase = sqlite3.connect('database_group43.db', isolation_level=None)
-  
+  #To post a quote company enters its product details and id
+  query_new_product='''
+                INSERT INTO Product(
+                  Product_Name,
+                  Product_CurrencyCode,
+                  Product_Price,
+                  Company_ID
+
+                )
+                VALUES(
+                  "{Product_Name}",
+                  "{Product_CurrencyCode}",
+                  {Product_Price},
+                  {Company_ID}
+                )                
+                '''.format(
+                  Product_Name=str(values_dict['Product_Name']),
+                  Product_CurrencyCode=str(values_dict['Product_CurrencyCode']),
+                  Product_Price=str(values_dict['Product_Price']),
+                  Company_ID=str(values_dict['Company_ID'])
+                )
+  dbase.execute(query_new_product)
+
+
+
+
 
   #---Filter for product_id using name, currency, price and company 
   query_product='''
@@ -189,6 +247,9 @@ async def review_quote(payload: Request):
   
   print(query_customerid)
   print_query_customer_if_list=dbase.execute(query_customerid).fetchall()
+  if len(print_query_customer_if_list)==0:
+    print("This customer has no account in our database")
+    return "This customer has no account in our database"
   print(print_query_customer_if_list)
   customerid=dbase.execute(query_customerid).fetchall()[0][0]
   print(customerid)
@@ -224,9 +285,20 @@ async def review_quote(payload: Request):
   VAT_Included=float(values_dict['Product_Price'])*1.21
 
 
+  quote_print={
+  "Product_Name"               : str(values_dict['Product_Name']),
+  "Product_CurrencyCode"       : str(values_dict['Product_CurrencyCode']),
+  "Product_Price"              : (values_dict['Product_Price']),
+  "Product_Price_VAT_Included" :float(values_dict['Product_Price'])*1.21,
+  "Company_ID"                 : (values_dict['Company_ID']),
+  "Quote_Quantity"             : (values_dict['Quote_Quantity']),
+  "Quote_Date"                 : str(values_dict['Quote_Date']),
+  "Customer_Email"             : str(values_dict['Customer_Email'])
+  }
+
 
   dbase.close()
-  return last_quoate_print,VAT_Included,VAT_Excluded
+  return quote_print
 
 
 
@@ -300,11 +372,17 @@ async def convert_quote_to_subscription(payload: Request):
       )
   print(accept_quote)
   dbase.execute(accept_quote)
-
+  query_name='''SELECT Customer.Customer_Name, Customer.Customer_Surname
+                FROM Customer
+                WHERE Customer_ID="{Customer_ID}"
+                '''.format(Customer_ID=str(values_dict['Customer_ID']))
+  query_customer_name_surname=dbase.execute(query_name).fetchall()
+  name=query_customer_name_surname[0][0]
+  surname=query_customer_name_surname[0][1]
 
 
   dbase.close()
-  return True
+  return "Customer {} {} has accepted the quote".format(name,surname)
 
 
 
@@ -363,8 +441,17 @@ async def create_invoice(payload: Request):
   insert_invoice=dbase.execute(query_insert_invoice).fetchall()
   print(insert_invoice)
 
+  query_name='''SELECT Customer.Customer_Name, Customer.Customer_Surname
+                FROM Customer
+                WHERE Customer_ID="{Customer_ID}"
+                '''.format(Customer_ID=str(values_dict['Customer_ID']))
+  query_customer_name_surname=dbase.execute(query_name).fetchall()
+  name=query_customer_name_surname[0][0]
+  surname=query_customer_name_surname[0][1]
+
   dbase.close()     
-  return True
+  return "New invoice created for customer  {} {}".format(name,surname)
+
 
 
 
@@ -410,6 +497,7 @@ async def update_invoice(payload: Request):
                         WHERE Customer_ID={Customer_ID}
                         AND Subscription_ID={Subscription_ID}
                         AND Invoice_Paid=0
+                        OR Invoice_Paid="NULL"
                         '''.format(
                           Customer_ID=str(values_dict['Customer_ID']),
                           Subscription_ID=str(values_dict['Subscription_ID']))
@@ -417,6 +505,9 @@ async def update_invoice(payload: Request):
   a=dbase.execute(query_invoice_update).fetchall()
   print(a)
   if a==None:
+    print("Customer doesn't have any pending Invoice")
+    return "Customer doesn't have any pending Invoice"
+  elif a[0][0]:
     print("Customer doesn't have any pending Invoice")
     return "Customer doesn't have any pending Invoice"
 
@@ -439,144 +530,11 @@ async def update_invoice(payload: Request):
   dbase.execute(query_invoice_update)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   dbase.close()
   return True
 
 
 
-
-
-
-
-
-
-
-
-
-@app.get("/check_invoices")
-async def check_invoices(payload: Request):
-  values_dict = await payload.json()
-  #open DB
-  dbase = sqlite3.connect('database_group43.db', isolation_level=None)
-  
-  dbase.execute('database_group43.db', isolation_level=None)
-  query_invoices = dbase.execute('''
-                              SELECT ID FROM Invoices
-                              WHERE CustomerAccountID = {CustomerAccountID} AND Paid = 0
-                              '''.format(CustomerAccountID=str(values_dict['CustomerAccountID'])))
-  invoices_results = query_invoices_status.fetchall()
-  dbase.close()
-  # Encode results in JSON to send it back as response
-  return json.dumps(invoices_results)
-  #Customer payment payload example
-  #{ 
-  #  "InvoiceID": "1",
-  #  "CCNumber": "5888 8884 9562 7784"
-  #}
-@app.post("/customer_payment")
-async def customer_paymnent(payload: Request):
-  values_dict = await payload.json()
-  #open DB
-  dbase = sqlite3.connect('database_group43.db', isolation_level=None)
-  
-  dbase.execute('database_group43.db', isolation_level=None)
-  CCNumber = values_dict["CCNumber"]
-  query_invoices = dbase.execute('''
-                            SELECT ID FROM Invoices
-                            WHERE InvoiceID = {InvoiceID} 
-                            '''.format(InvoiceID=str(values_dict['InvoiceID'])))
-  Invoices_results = query_invoices_status.fetchall()
-  #Calculation here
-  #validationNumber = 
-  # There must be one single invoice with that ID and the validation number must be dividable by 10
-  if len(Invoices_results) == 1 and validationNumber % 10 == 0:
-    dbase.execute(''' 
-      UPDATE Invoice
-        SET Paid = 1
-        WHERE InvoiceID = {InvoiceID}  
-      '''.format(InvoiceID = values_dict['InvoiceID']))
-  dbase.close() 
-  return True
-
- #Retrieve statistics payload example
-#{ 
-# "CompanyID" : "1",
-# "Month" : "12",
-# "Year" : "2021"
-#}
-@app.post("/retrieve_statistics")
-async def retrieve_statistics(payload: Request):
-  values_dict = await payload.json()
-  #open DB
-  dbase = sqlite3.connect('database_group43.db', isolation_level=None)
-  
-  dbase.execute('database_group43.db', isolation_level=None)
-   # Calculate MRR 
-  query_statistics = dbase.execute('''
-                              SELECT SUM(TotalDueEuro) 
-                              FROM Invoices
-                              WHERE CompanyID = {CompanyID} AND strftime('%m',DueDate)={Month} AND strftime('%Y', DueDate)={Year}
-                              '''.format(CompanyID=str(values_dict['CompanyID']), Month=str(values_dict['Month']), Year=str(values_dict['Year'])))
-  MRR = query_statistics.fetchall()[0][0]
-   # Calculate ARR - TO CORRECT !! NOT GOOD
-  query_statistics = dbase.execute('''
-                              SELECT SUM(TotalDueEuro) 
-                              FROM Invoices
-                              WHERE CompanyID = {CompanyID} AND strftime('%Y', DueDate)={Year}
-                              '''.format(CompanyID=str(values_dict['CompanyID']), Year=str(values_dict['Year'])))
-  ARR = query_statistics.fetchall()[0][0]
-    #Calculation of number of Customer                                                                                             
-  query_Customer = dbase.execute('''
-                                  SELECT COUNT(CustomerAccountID) FROM CustomerAccounts
-                                  WHERE CompanyID = {CompanyID}'''.format(CompanyID=str(values_dict['CompanyID'])))  
-
-  NumberOfCustomer = query_Customer.fetchall()[0][0]
-    #Calculation of average revenue per customer per month
-  if NumberOfCustomer > 0:
-      query_statistics = dbase.execute('''
-                              SELECT SUM(TotalDueEuro) 
-                              FROM Invoices
-                              WHERE CompanyID = {CompanyID} 
-                              '''.format(CompanyID=str(values_dict['CompanyID'])))
-      AverageTotalRevenuePerCustomer = query_statistics.fetchall()[0][0] / NumberOfCustomer
-  else:
-      AverageTotalRevenuePerCustomer = 0
-    # Retrieve list of current active subscriptions: Customer name and surname, product name, start and end date
-    # All active subscriptions => Active=1 BUT EndDate not passed as we don't have a system to automatically set a subscription as inactive when end date is passed.
-  query_Customer = dbase.execute('''
-                                  SELECT Name, Surname,ProductName, Subscriptions.StartDate, Subscriptions.EndDate
-                                  FROM Subscriptions
-                                  LEFT JOIN CustomerAccounts ON CustomerAccounts.ID=Subscriptions.CustomerAccountID
-                                  LEFT JOIN Customer ON Customer.ID=CustomerAccounts.CustomerID
-                                  LEFT JOIN Products ON Products.ID=Subscriptions.ProductID
-                                  WHERE CustomerAccounts.CompanyID={CompanyID} 
-                                    AND Subscriptions.Active=1 
-                                    AND Subscriptions.EndDate >= date('now')'''.format(CompanyID=str(values_dict['CompanyID'])))
-  active_subscriptions_results = query_Customer.fetchall()
-    # return json.dumps(active_subscriptions_results
-
-  return True
 
 
 
