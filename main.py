@@ -258,9 +258,11 @@ async def convert_quote_to_subscription(payload: Request):
         Product_ID=str(values_dict["Product_ID"]))
   print(get_quote)
   
+  a=dbase.execute(get_quote)
+  if a==0:
+    return "This Customer has not recieved a quote to accept"
+
   quoteid=dbase.execute(get_quote).fetchall()[0][0]
-  if quoteid==0:
-    return "error"
   print(quoteid)
 
 
@@ -272,15 +274,18 @@ async def convert_quote_to_subscription(payload: Request):
   update_sub='''
       INSERT INTO Subscription(
       Quote_ID,
-      Customer_ID
+      Customer_ID,
+      Product_ID
       )
       VALUES(
       {Quote_ID},
-      {Customer_ID}
+      {Customer_ID},
+      {Product_ID}
       )
     '''.format(
         Quote_ID=str(quoteid),
-        Customer_ID=str(values_dict["Customer_ID"])
+        Customer_ID=str(values_dict["Customer_ID"]),
+        Product_ID=str(values_dict["Product_ID"])
     )
   dbase.execute(update_sub)
   accept_quote='''
@@ -291,6 +296,7 @@ async def convert_quote_to_subscription(payload: Request):
       '''.format( 
         Quote_ID=str(quoteid),
         Customer_ID=str(values_dict["Customer_ID"])
+        
       )
   print(accept_quote)
   dbase.execute(accept_quote)
@@ -327,43 +333,135 @@ async def create_invoice(payload: Request):
   #open DB
   dbase = sqlite3.connect('database_group43.db', isolation_level=None)
   query_active_subs ='''
-                            SELECT Subscription.Customer_ID, Quote.Quote_ID 
-                            FROM Subscription
-                            LEFT JOIN Quote ON Quote.Quote_ID=Subscription.Quote_ID
-                            WHERE Subscription_Active = 1 
-                            AND Customer_ID = {Customer_ID}
-                            '''.format(Customer_ID=values_dict['Customer_ID'])
+                    SELECT Subscription.Subscription_ID 
+                    FROM Subscription
+                    WHERE Subscription_Active = 1 
+                    AND Subscription.Customer_ID = {Customer_ID}
+                    '''.format(Customer_ID=values_dict['Customer_ID'])
   print(query_active_subs)
   a=dbase.execute(query_active_subs).fetchall()
   print(a)
-  print(str(a))
 
+  if len(a)==0:
+    print("This customer does not have a subscription")
+    return 'This customer does not have a subscription'
+    
+  
+  subscriptionid=a[0][0]
 
+  query_insert_invoice='''
+                    INSERT INTO Invoice(
+                      Customer_ID,
+                      Subscription_ID
+                    ) 
+                    VALUES({Customer_ID},{Subscription_ID})       
+                    '''.format(
+                      Customer_ID=str(values_dict['Customer_ID']),
+                      Subscription_ID=str(subscriptionid)
+                    )
+  print(query_insert_invoice)
+  insert_invoice=dbase.execute(query_insert_invoice).fetchall()
+  print(insert_invoice)
 
-
-  #We assumed DueDate to be 30 days after the invoice date
-#  dbase.execute('''
-#    INSERT INTO Invoices(
-#      InvoiceDate,
-#      DueDate,
-#      TotalDueEuro,
-#      CompanyID)
-#      VALUES(
-#        {InvoiceDate},
-#        DATE({InvoiceDate2},'+30 days'),
-#        {TotalDueEuro},
-#        CompanyID)
-#        '''.format(
-#          InvoiceDate=str(values_dict['InvoiceDate']),
-#          InvoiceDate2=str(values_dict['InvoiceDate']),
-#          TotalDueEuro=TotalDueEuro),
-#          CompanyID=str(values_dict['CompanyID']))     
   dbase.close()     
   return True
 
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#----------------Customer pay inovoice 
+
+@app.post("/update_invoice")
+async def update_invoice(payload: Request):
+  values_dict = await payload.json()
+  #open DB
+  dbase = sqlite3.connect('database_group43.db', isolation_level=None)
+
+
+  query_invoice_update='''
+                        SELECT Invoice.Invoice_ID 
+                        FROM Invoice
+                        WHERE Customer_ID={Customer_ID}
+                        AND Subscription_ID={Subscription_ID}
+                        AND Invoice_Paid=0
+                        '''.format(
+                          Customer_ID=str(values_dict['Customer_ID']),
+                          Subscription_ID=str(values_dict['Subscription_ID']))
+  print(query_invoice_update)
+  a=dbase.execute(query_invoice_update).fetchall()
+  print(a)
+  if a==None:
+    print("Customer doesn't have any pending Invoice")
+    return "Customer doesn't have any pending Invoice"
+
+
+  invoiceid=a[0][0]
+  print(invoiceid)
+  
+  
+  
+  
+  query_invoice_update='''
+                        UPDATE Invoice
+                        SET Invoice_Paid=1,
+                        Invoice_PaidDate= "{Invoice_PaidDate}"
+                        WHERE Invoice_ID={Invoice_ID}
+                        '''.format(
+                          Invoice_PaidDate=str(values_dict['Invoice_PaidDate']),
+                          Invoice_ID=str(invoiceid))
+  print(query_invoice_update)
+  dbase.execute(query_invoice_update)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  dbase.close()
+  return True
 
 
 
