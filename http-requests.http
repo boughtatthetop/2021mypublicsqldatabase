@@ -94,7 +94,7 @@ GET http://127.0.0.1:8000/ask_mrr HTTP/1.1
 Content-Type: application/json
 
 {
-    "Company_ID" : "2"
+    "Company_ID" : "1"
 }
 
 ###
