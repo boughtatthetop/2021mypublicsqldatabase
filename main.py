@@ -288,7 +288,7 @@ async def review_quote(payload: Request):
   quote_print={
   "Product_Name"               : str(values_dict['Product_Name']),
   "Product_CurrencyCode"       : str(values_dict['Product_CurrencyCode']),
-  "Product_Price"              : (values_dict['Product_Price']),
+  "Product_Price"              : float(values_dict['Product_Price']),
   "Product_Price_VAT_Included" :float(values_dict['Product_Price'])*1.21,
   "Company_ID"                 : (values_dict['Company_ID']),
   "Quote_Quantity"             : (values_dict['Quote_Quantity']),
@@ -330,9 +330,14 @@ async def convert_quote_to_subscription(payload: Request):
         Product_ID=str(values_dict["Product_ID"]))
   print(get_quote)
   
-  a=dbase.execute(get_quote)
-  if a==0:
-    return "This Customer has not recieved a quote to accept"
+  a=dbase.execute(get_quote).fetchall()
+  print(a)
+  if len(a)==0:
+    print("This Customer has not recieved a quote to accept on this product")
+    return "This Customer has not recieved a quote to accept on this product"
+  elif a[0][0]==None:
+    print("This Customer has not recieved a quote to accept on this product")
+    return "This Customer has not recieved a quote to accept on this product"
 
   quoteid=dbase.execute(get_quote).fetchall()[0][0]
   print(quoteid)
@@ -380,9 +385,57 @@ async def convert_quote_to_subscription(payload: Request):
   name=query_customer_name_surname[0][0]
   surname=query_customer_name_surname[0][1]
 
+  print("Customer {} {} has accepted the quote".format(name,surname))
+
+  customer_email_query='''SELECT Customer_Email FROM Customer 
+                          WHERE Customer_ID={Customer_ID}'''.format(
+                            Customer_ID=str(values_dict['Customer_ID']))
+  customeremail=dbase.execute(customer_email_query).fetchall()[0][0]
+  query_name='''SELECT Customer.Customer_Name, Customer.Customer_Surname
+                FROM Customer
+                WHERE Customer_ID="{Customer_ID}"
+                '''.format(Customer_ID=str(values_dict['Customer_ID']))
+  query_customer_name_surname=dbase.execute(query_name).fetchall()
+  name=query_customer_name_surname[0][0]
+  surname=query_customer_name_surname[0][1]
+
+  query_prduct='''  
+              SELECT Product_Name,Product_CurrencyCode,Product_Price 
+              FROM Product
+              WHERE Product_ID={Product_ID}
+              '''.format(
+              
+                Product_ID=str(values_dict["Product_ID"]))
+  product=dbase.execute(query_prduct).fetchall()
+  productname=product[0][0]
+  productcurrency=product[0][1]
+  productprice=product[0][2]      
+
+  query_quote='''
+            SELECT Quote_Quantity, Quote_Date
+            FROM Quote
+            WHERE Quote_ID = {Quote_ID}
+            '''.format(Quote_ID=str(quoteid))
+  quantity=dbase.execute(query_quote).fetchall()[0][0]
+  quotedate=dbase.execute(query_quote).fetchall()[0][1]
+
+  customeraccepted={
+   'Customer_Email'           :   customeremail,            
+   'Customer_Name'            :   name,     
+   'Customer_Surname'         :   surname,     
+   "Product_Name"            :   str(productname),
+  "Product_CurrencyCode"       : str(productcurrency),
+  "Product_Price"              : float(productprice),
+  "Product_Price_VAT_Included" :float()*1.21,
+  "Quote_Quantity"             : int(quantity),
+  "Quote_Date"                 : str(quotedate)
+
+
+  }
+
 
   dbase.close()
-  return "Customer {} {} has accepted the quote".format(name,surname)
+  return customeraccepted
 
 
 
