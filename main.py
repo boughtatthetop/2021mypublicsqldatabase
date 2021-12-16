@@ -1190,43 +1190,11 @@ async def update_invoice(payload: Request):
   sumcus=len(numberofsubs)
 
 
-  query_product='''
-                SELECT Company.Company_ID, Product.Product_ID, Product.Product_CurrencyCode, Product.Product_Price, Quote.Quote_Quantity   
-                FROM Product
-                LEFT JOIN Company ON Company.Company_ID=Product.Company_ID
-                LEFT JOIN Subscription ON Subscription.Product_ID=Product.Product_ID
-                LEFT JOIN Quote ON Quote.Product_ID=Product.Product_ID 
-                WHERE Subscription.Subscription_Active=1
-                AND Company.Company_ID={Company_ID}
-                '''.format(
-                      Company_ID=str(values_dict['Company_ID']))
-  
-  print(query_product)
-  test_query=dbase.execute(query_product).fetchall()
-  print(test_query)
-  
-  companyid=str(values_dict['Company_ID'])
-
-
-  currencies_and_sum = {str(row[2]): 0 for row in test_query}
-  for row in test_query:
-    currencies_and_sum[str(row[2])] += row[3] * row[4]
-
-
-  totalsales=[]
-  for cur in list(currencies_and_sum.items()):
-    print(str(cur[0]),cur[1])
-    totalsales.append(converter(str(cur[0]),cur[1]))
-  print(totalsales) 
-  print(sum(totalsales))
-  sumvar=sum(totalsales)*12
-
-
-  averagerevenuepercustomer=sumvar/sumcus
+  averagerevenuepercustomer=sumcus
   revdetail={
 
     "Total active customers"       : (sumcus),
-    "Average annual revenue per customer" : (averagerevenuepercustomer)
+
    } 
 
  
