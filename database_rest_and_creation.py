@@ -142,7 +142,9 @@ dbase.execute('''
         Quote_Date                  DATE NOT NULL,
         Product_ID                  INTEGER NOT NULL,
         Customer_ID                 INTEGER NOT NULL,
+        Company_ID                  INTEGER NOT NULL, 
         
+        FOREIGN KEY(Company_ID)REFERENCES Company(Company_ID), 
         FOREIGN KEY(Product_ID) REFERENCES Product(Product_ID),
         FOREIGN KEY(Customer_ID) REFERENCES Quote(Customer_ID)
     )    
@@ -158,7 +160,9 @@ dbase.execute('''
         Quote_ID                    INTEGER,
         Customer_ID                 INTEGER,
         Product_ID                  INTEGER,
-
+        Company_ID                  INTEGER NOT NULL, 
+        
+        FOREIGN KEY(Company_ID)REFERENCES Company(Company_ID), 
         FOREIGN KEY(Quote_ID) REFERENCES Quote(Quote_ID),
         FOREIGN KEY(Customer_ID)REFERENCES Customer(Customer_ID),
         FOREIGN KEY(Product_ID)REFERENCES Product(Product_ID))    
@@ -174,7 +178,9 @@ dbase.execute('''
         Invoice_PaidDate            DATE,      
         Customer_ID                 INTEGER,
         Subscription_ID             INTEGER,
+        Company_ID                  INTEGER NOT NULL, 
         
+        FOREIGN KEY(Company_ID)REFERENCES Company(Company_ID),
         FOREIGN KEY(Customer_ID) REFERENCES Customer(Customer_ID),
         FOREIGN KEY(Subscription_ID)REFERENCES Subscription(Subscription_ID)    )    
     ''')
@@ -340,69 +346,78 @@ def Quote_recorder(
         Quote_Quantity,
         Quote_Date,
         Product_ID,
-        Customer_ID   
+        Customer_ID,
+        Company_ID   
         ):  
         dbase.execute('''
         INSERT INTO Quote(
         Quote_Quantity,
         Quote_Date,
         Product_ID,
-        Customer_ID  
+        Customer_ID,
+        Company_ID  
         )
-        VALUES(?,?,?,?)     
+        VALUES(?,?,?,?,?)     
         '''
         ,
         (          
         Quote_Quantity,
         Quote_Date,
         Product_ID,
-        Customer_ID))
+        Customer_ID,
+        Company_ID))
 
 def Subscription_recorder( 
         Subscription_Active, 
         Quote_ID,   
         Customer_ID,
-        Product_ID  
+        Product_ID,
+        Company_ID  
         ):  
         dbase.execute('''
         INSERT INTO Subscription(
         Subscription_Active, 
         Quote_ID,   
         Customer_ID,
-        Product_ID 
+        Product_ID,
+        Company_ID 
 
         )
-        VALUES(?,?,?,?)     
+        VALUES(?,?,?,?,?)     
         '''
         ,
         (  
         Subscription_Active, 
         Quote_ID,   
         Customer_ID,
-        Product_ID           
+        Product_ID,
+        Company_ID           
         ))
 
 def Invoice_recorder( 
         Invoice_Paid, 
         Invoice_PaidDate,   
         Customer_ID,
-        Subscription_ID
+        Subscription_ID,
+        Company_ID
         ):  
         dbase.execute('''
         INSERT INTO Invoice(
         Invoice_Paid, 
         Invoice_PaidDate,   
         Customer_ID,
-        Subscription_ID 
+        Subscription_ID,
+        Company_ID 
         )
-        VALUES(?,?,?,?)     
+        VALUES(?,?,?,?,?)     
         '''
         ,
         ( 
         Invoice_Paid, 
         Invoice_PaidDate,   
         Customer_ID,
-        Subscription_ID
+        Subscription_ID,
+        Company_ID
         ))
 
 #def Invocie_recorder( 
@@ -476,24 +491,24 @@ for Product_Name, Product_CurrencyCode, Product_Price, Company_ID in Product_Lis
 
 
 Quote_List=[
-    (1,"2021-01-01",1,1)     
+    (1,"2021-01-01",1,1,1)     
 ]
-for Quote_Quantity, Quote_Date, Product_ID, Customer_ID in Quote_List:
-    Quote_recorder(Quote_Quantity, Quote_Date, Product_ID, Customer_ID)
+for Quote_Quantity, Quote_Date, Product_ID, Customer_ID,Company_ID in Quote_List:
+    Quote_recorder(Quote_Quantity, Quote_Date, Product_ID, Customer_ID,Company_ID)
 
 
 
 Subscription_List=[
-    (1,1,1,1)    
+    (1,1,1,1,1)    
 ]
-for Subscription_Active,Quote_Quantity, Customer_ID, Product_ID in Subscription_List:
-    Subscription_recorder(Subscription_Active,Quote_Quantity, Customer_ID, Product_ID)
+for Subscription_Active,Quote_Quantity, Customer_ID, Product_ID,Company_ID in Subscription_List:
+    Subscription_recorder(Subscription_Active,Quote_Quantity, Customer_ID, Product_ID,Company_ID)
 
 
 Invoice_List=[
-    (1,"2021-1-1",1,1)]
-for Invoice_Paid, Invoice_PaidDate, Customer_ID, Subscription_ID in Invoice_List:
-    Invoice_recorder(Invoice_Paid, Invoice_PaidDate, Customer_ID, Subscription_ID)
+    (1,"2021-1-1",1,1,1)]
+for Invoice_Paid, Invoice_PaidDate, Customer_ID, Subscription_ID,Company_ID in Invoice_List:
+    Invoice_recorder(Invoice_Paid, Invoice_PaidDate, Customer_ID, Subscription_ID,Company_ID)
 
 
 

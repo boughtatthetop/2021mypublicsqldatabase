@@ -1,26 +1,8 @@
 import requests
-import dotenv
-import os
-# env is a dictionary of all environment and .env defined values
-# the order below overrides all .env vars with os.environ
-env = {
-    **dotenv.dotenv_values(".env"), 
-    **os.environ,
-}
+url = 'https://v6.exchangerate-api.com/v6/405afebcba497e0aa9ef8c7e/pair/EUR/{}/{}'
 
-#So to use this, you could do something like:
-# file: .env
-API_KEY='test'
-# file: main.py
-
-# using the above import and env...
-TOKEN = env["API_KEY"]
-
-
-url = 'https://v6.exchangerate-api.com/v6/TOKEN/pair/EUR/{}/{}'
-
-def converter(currency,amountUSD):
-    amountconverter= requests.get(url.format(currency,amountUSD)).json()
+def converter(currency,amounttotal):
+    amountconverter= requests.get(url.format(currency,amounttotal)).json()
     amountEUR=amountconverter["conversion_result"]
     return amountEUR
 

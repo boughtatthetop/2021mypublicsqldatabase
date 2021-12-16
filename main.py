@@ -1,12 +1,15 @@
 from os import truncate
 import sqlite3
 from sqlite3.dbapi2 import connect
+from typing import Counter
 from fastapi import FastAPI, Request
 import uvicorn
 import LUHN as L
 import pandas as pd
 import datetime
 import json
+import requests
+from exchangerateAPI import converter 
 
 app = FastAPI()
 
@@ -25,10 +28,10 @@ def root():
 
 
 
-
-
-
-#------------------------------REQUIREMENT NUMBER 1 = COMPANY CREATE ACCOUNT -------------------------------------------- 
+#--------REQUIREMENT NUMBER 1 = COMPANY CREATE ACCOUNT ------------------ #--------REQUIREMENT NUMBER 1 = COMPANY CREATE ACCOUNT ------------------ #--------REQUIREMENT NUMBER 1 = COMPANY CREATE ACCOUNT ------------------ 
+#--------REQUIREMENT NUMBER 1 = COMPANY CREATE ACCOUNT ------------------ 
+#--------REQUIREMENT NUMBER 1 = COMPANY CREATE ACCOUNT ------------------ 
+#--------REQUIREMENT NUMBER 1 = COMPANY CREATE ACCOUNT ------------------ 
 
 @app.post("/create_company_account")
 async def create_company_account(payload: Request):
@@ -98,8 +101,14 @@ async def create_company_account(payload: Request):
 
 
 
-#---------------------------------------------REQUIREMENT NUMBER 2 = CUSTOMER CREATES ACCOUNT----------------------------
-
+#----------REQUIREMENT NUMBER 2 = CUSTOMER CREATES ACCOUNT------------
+#----------REQUIREMENT NUMBER 2 = CUSTOMER CREATES ACCOUNT------------
+#----------REQUIREMENT NUMBER 2 = CUSTOMER CREATES ACCOUNT------------
+#----------REQUIREMENT NUMBER 2 = CUSTOMER CREATES ACCOUNT------------
+#----------REQUIREMENT NUMBER 2 = CUSTOMER CREATES ACCOUNT------------
+#----------REQUIREMENT NUMBER 2 = CUSTOMER CREATES ACCOUNT------------
+#----------REQUIREMENT NUMBER 2 = CUSTOMER CREATES ACCOUNT------------
+#----------REQUIREMENT NUMBER 2 = CUSTOMER CREATES ACCOUNT------------
 @app.post("/create_customer_account")
 async def create_customer_account(payload: Request):
   values_dict = await payload.json()
@@ -183,7 +192,14 @@ async def create_customer_account(payload: Request):
 
 
 
-#-------------------------------------------------REQUIREMENT NUMBER 3 = COMPANY Creates A QUOTE------------------
+#---------------REQUIREMENT NUMBER 3 = COMPANY Creates A QUOTE------------------
+#---------------REQUIREMENT NUMBER 3 = COMPANY Creates A QUOTE------------------
+#---------------REQUIREMENT NUMBER 3 = COMPANY Creates A QUOTE------------------
+#---------------REQUIREMENT NUMBER 3 = COMPANY Creates A QUOTE------------------
+#---------------REQUIREMENT NUMBER 3 = COMPANY Creates A QUOTE------------------
+#---------------REQUIREMENT NUMBER 3 = COMPANY Creates A QUOTE------------------
+#---------------REQUIREMENT NUMBER 3 = COMPANY Creates A QUOTE------------------
+#---------------REQUIREMENT NUMBER 3 = COMPANY Creates A QUOTE------------------
 
 @app.post("/create_quote")
 async def review_quote(payload: Request):
@@ -263,16 +279,19 @@ async def review_quote(payload: Request):
                 Quote_Quantity,
                 Quote_Date,
                 Product_ID,
-                Customer_ID)
+                Customer_ID,
+                Company_ID)
                 VALUES(
                   {Quote_Quantity},
                   "{Quote_Date}",
                   {Product_ID},
-                  {Customer_ID})'''.format(
+                  {Customer_ID},
+                  {Company_ID})'''.format(
                     Quote_Quantity=str(values_dict['Quote_Quantity']),
                     Quote_Date=str(values_dict['Quote_Date']),
                     Product_ID=str(productid),
-                    Customer_ID=str(customerid)
+                    Customer_ID=str(customerid),
+                    Company_ID=str(values_dict['Company_ID'])
                   )
   print(query_quote)
   results_quote=(dbase.execute(query_quote).fetchall())
@@ -302,6 +321,16 @@ async def review_quote(payload: Request):
   print(json.dumps(quote_print, indent = 3))
   dbase.close()
   return quote_print
+#-------------------------------------------------------
+#-------------------------------------------------------
+#-------------------------------------------------------
+#-------------------------------------------------------
+#-------------------------------------------------------
+#-------------------------------------------------------
+#-------------------------------------------------------
+#-------------------------------------------------------
+#-------------------------------------------------------
+#-------------------------------------------------------
 
 
 
@@ -310,13 +339,13 @@ async def review_quote(payload: Request):
 
 
 
-
-
-
-
-
-
-#-----------REQUIREMENT NUMBER 4: CUSTOMER ACCEPTS THE QUOTE------------------------
+#-----------REQUIREMENT NUMBER 4: CUSTOMER ACCEPTS THE QUOTE------------
+#-----------REQUIREMENT NUMBER 4: CUSTOMER ACCEPTS THE QUOTE------------
+#-----------REQUIREMENT NUMBER 4: CUSTOMER ACCEPTS THE QUOTE------------
+#-----------REQUIREMENT NUMBER 4: CUSTOMER ACCEPTS THE QUOTE------------
+#-----------REQUIREMENT NUMBER 4: CUSTOMER ACCEPTS THE QUOTE------------
+#-----------REQUIREMENT NUMBER 4: CUSTOMER ACCEPTS THE QUOTE------------
+#-----------REQUIREMENT NUMBER 4: CUSTOMER ACCEPTS THE QUOTE------------
 
 @app.post("/accept_quote")
 async def convert_quote_to_subscription(payload: Request):
@@ -345,7 +374,14 @@ async def convert_quote_to_subscription(payload: Request):
   quoteid=dbase.execute(get_quote).fetchall()[0][0]
   print(quoteid)
 
-
+  get_companyid=''' 
+      SELECT Company.Company_ID FROM Product 
+      WHERE Product_ID={Product_ID}
+      '''.format(
+               Product_ID=str(values_dict["Product_ID"]))
+  print(get_companyid)
+  
+  comapnyid=dbase.execute(get_companyid).fetchall()[0][0]
 
 
 
@@ -355,17 +391,20 @@ async def convert_quote_to_subscription(payload: Request):
       INSERT INTO Subscription(
       Quote_ID,
       Customer_ID,
-      Product_ID
+      Product_ID,
+      Company_ID
       )
       VALUES(
       {Quote_ID},
       {Customer_ID},
-      {Product_ID}
+      {Product_ID},
+      {Company_ID}
       )
     '''.format(
         Quote_ID=str(quoteid),
         Customer_ID=str(values_dict["Customer_ID"]),
-        Product_ID=str(values_dict["Product_ID"])
+        Product_ID=str(values_dict["Product_ID"]),
+        Company_ID=str(comapnyid)
     )
   dbase.execute(update_sub)
   accept_quote='''
@@ -441,24 +480,32 @@ async def convert_quote_to_subscription(payload: Request):
   dbase.close()
   return customeraccepted
 
+#-------------------------------------------------------
+#-------------------------------------------------------
+#-------------------------------------------------------
+#-------------------------------------------------------
+#-------------------------------------------------------
+#-------------------------------------------------------
+#-------------------------------------------------------
+#-------------------------------------------------------
+#-------------------------------------------------------
+#-------------------------------------------------------
 
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
+#----------------INVOICE CREATION-------------------
+#----------------INVOICE CREATION-------------------
+#----------------INVOICE CREATION-------------------
+#----------------INVOICE CREATION-------------------
+#----------------INVOICE CREATION-------------------
+#----------------INVOICE CREATION-------------------
+#----------------INVOICE CREATION-------------------
+#----------------INVOICE CREATION-------------------
+#----------------INVOICE CREATION-------------------
+#----------------INVOICE CREATION-------------------
 
 #-------------------------Customer requests to see Inovice 
 
@@ -484,15 +531,30 @@ async def create_invoice(payload: Request):
   
   subscriptionid=a[0][0]
 
+
+
+  get_companyid=''' 
+      SELECT Subscription.Company_ID FROM Subscription 
+      WHERE Subscription_ID={Subscription_ID}
+      '''.format(
+               Subscription_ID=str(subscriptionid))
+  print(get_companyid)
+  
+  comapnyid=dbase.execute(get_companyid).fetchall()[0][0]
+
+
+
   query_insert_invoice='''
                     INSERT INTO Invoice(
                       Customer_ID,
-                      Subscription_ID
+                      Subscription_ID,
+                      Company_ID
                     ) 
-                    VALUES({Customer_ID},{Subscription_ID})       
+                    VALUES({Customer_ID},{Subscription_ID},{Company_ID})       
                     '''.format(
                       Customer_ID=str(values_dict['Customer_ID']),
-                      Subscription_ID=str(subscriptionid)
+                      Subscription_ID=str(subscriptionid),
+                      Company_ID=str(comapnyid)
                     )
   print(query_insert_invoice)
   insert_invoice=dbase.execute(query_insert_invoice).fetchall()
@@ -583,23 +645,24 @@ async def create_invoice(payload: Request):
                           WHERE Customer_ID={Customer_ID}'''.format(
                             Customer_ID=str(values_dict['Customer_ID']))
   customeremail=dbase.execute(customer_email_query).fetchall()[0][0]
+  print(customeremail)
+
 
   query_prduct='''  
               SELECT Product_Name,Product_CurrencyCode,Product_Price 
               FROM Product
               WHERE Product_ID={Product_ID}
               '''.format(
-              
-                Product_ID=str(values_dict["Product_ID"]))
+                Product_ID=str(productid))
   product=dbase.execute(query_prduct).fetchall()
   productname=product[0][0]
 
 
 
   inovicedetails={
-   'Customer_Email'           :   customeremail,            
-   'Customer_Name'            :   name,     
-   'Customer_Surname'         :   surname,     
+   'Customer_Email'           :   str(customeremail),            
+   'Customer_Name'            :   str(name),     
+   'Customer_Surname'         :   str(surname),     
    "Product_Name"            :   str(productname),
   "Product_CurrencyCode"       : str(productcurrency),
   "Product_Price"              : float(productprice),
@@ -619,6 +682,15 @@ async def create_invoice(payload: Request):
   return inovicedetails 
 
 
+#-------------------------------------------------------
+#-------------------------------------------------------
+#-------------------------------------------------------
+#-------------------------------------------------------
+#-------------------------------------------------------
+#-------------------------------------------------------
+#-------------------------------------------------------
+#-------------------------------------------------------
+#-------------------------------------------------------
 
 
 
@@ -638,17 +710,15 @@ async def create_invoice(payload: Request):
 
 
 
-
-
-
-
-
-
-
-
-
-
-#----------------Customer pay inovoice 
+#------------------------SET INVOICE ACTIVE AND PRINT RESULTS---------------------
+#------------------------SET INVOICE ACTIVE AND PRINT RESULTS---------------------
+#------------------------SET INVOICE ACTIVE AND PRINT RESULTS---------------------
+#------------------------SET INVOICE ACTIVE AND PRINT RESULTS---------------------
+#------------------------SET INVOICE ACTIVE AND PRINT RESULTS---------------------
+#------------------------SET INVOICE ACTIVE AND PRINT RESULTS---------------------
+#------------------------SET INVOICE ACTIVE AND PRINT RESULTS---------------------
+#------------------------SET INVOICE ACTIVE AND PRINT RESULTS---------------------
+#------------------------SET INVOICE ACTIVE AND PRINT RESULTS---------------------
 
 @app.post("/update_invoice")
 async def update_invoice(payload: Request):
@@ -685,7 +755,11 @@ async def update_invoice(payload: Request):
 
   invoiceid=a[0][0]
 
-
+  customer_email_query='''SELECT Customer_Email FROM Customer 
+                          WHERE Customer_ID={Customer_ID}'''.format(
+                            Customer_ID=str(values_dict['Customer_ID']))
+  customeremail=dbase.execute(customer_email_query).fetchall()[0][0]
+  print(customeremail)
   
   
   
@@ -754,14 +828,14 @@ async def update_invoice(payload: Request):
   query_invoice_status='''
                         SELECT Invoice_Paid
                         FROM Invoice
-                        Invoice_PaidDate="{Invoice_PaidDate}"
-                        WHERE Invoice_ID={Invoice_ID}
+                        WHERE Invoice_PaidDate="{Invoice_PaidDate}"
+                        AND Invoice_ID={Invoice_ID}
                         '''.format(
                           Invoice_PaidDate=str(values_dict['Invoice_PaidDate']),
                           Invoice_ID=str(invoiceid))
   print(query_invoice_status)
   dbase.execute(query_invoice_status)
-  invoicestate=dbase.execute(query_invoice_status)[0][0]
+  invoicestate=dbase.execute(query_invoice_status).fetchall()[0][0]
   print(invoicestate)
 
   if invoicestate is None:
@@ -770,7 +844,7 @@ async def update_invoice(payload: Request):
   elif not invoicestate:
     print(" This customer invoice does not exists") 
   elif invoicestate==1:
-    invoicepaidyes=invoicestate
+    invoicepaidyes="Paid"
     print("The invoice has been paid")
 
 
@@ -811,6 +885,106 @@ async def update_invoice(payload: Request):
 
 
 
+#------------------------ANALYTICS---------------------
+#------------------------ANALYTICS---------------------
+#------------------------ANALYTICS---------------------
+#------------------------ANALYTICS---------------------
+#------------------------ANALYTICS---------------------
+#------------------------ANALYTICS---------------------
+#------------------------ANALYTICS---------------------
+
+
+
+
+
+
+
+
+#---------------GET MRR ------------------------
+
+@app.get("/ask_mrr")
+async def update_invoice(payload: Request):
+  values_dict = await payload.json()
+  #open DB
+  dbase = sqlite3.connect('database_group43.db', isolation_level=None)
+
+  query_product='''
+                SELECT Company.Company_ID, Product.Product_ID, Product.Product_CurrencyCode, Product.Product_Price, Quote.Quote_Quantity   
+                FROM Product
+                LEFT JOIN Company ON Company.Company_ID=Product.Company_ID
+                LEFT JOIN Subscription ON Subscription.Product_ID=Product.Product_ID
+                LEFT JOIN Quote ON Quote.Product_ID=Product.Product_ID 
+                WHERE Subscription.Subscription_Active=1
+                AND Company.Company_ID={Company_ID}
+                '''.format(
+                      Company_ID=str(values_dict['Company_ID']))
+  
+  print(query_product)
+  test_query=dbase.execute(query_product).fetchall()
+  print(test_query)
+  
+  companyid=str(values_dict['Company_ID'])
+  productid=[]
+  productcurrency=[]
+  productprice=[]
+  quotequantity=[]
+
+
+
+  for i in dbase.execute(query_product).fetchall():
+    productid.append(i[1])
+
+  for i in dbase.execute(query_product).fetchall():
+    productcurrency.append(i[2])
+
+
+  for i in dbase.execute(query_product).fetchall():
+    productprice.append(i[3])
+
+  
+  for i in dbase.execute(query_product).fetchall():
+    quotequantity.append(i[4])
+
+  print(productid,productcurrency,productprice,quotequantity)
+
+  currencies_and_sum = {str(row[2]): 0 for row in test_query}
+  for row in test_query:
+    currencies_and_sum[str(row[2])] += row[3] * row[4]
+
+
+  totalsales=[]
+  for cur in list(currencies_and_sum.items()):
+    print(str(cur[0]),cur[1])
+    totalsales.append(converter(str(cur[0]),cur[1]))
+  print(totalsales) 
+  print(sum(totalsales))
+  sumvar=sum(totalsales)
+
+
+
+
+
+  mrr={
+
+    "MRR in EUR"       : (sumvar),
+   } 
+
+ 
+  print(json.dumps(mrr, indent = 3))
+
+
+
+  
+  dbase.close()
+  return mrr
+#---------------------------------------------------
+#---------------------------------------------------
+#---------------------------------------------------
+#---------------------------------------------------
+#---------------------------------------------------
+#---------------------------------------------------
+#---------------------------------------------------
+#---------------------------------------------------
 
 
 
@@ -825,6 +999,244 @@ async def update_invoice(payload: Request):
 
 
 
+
+#--------------------------ARR--------------------
+#--------------------------ARR--------------------
+#--------------------------ARR--------------------
+#--------------------------ARR--------------------
+#--------------------------ARR--------------------
+#--------------------------ARR--------------------
+#--------------------------ARR--------------------
+#--------------------------ARR--------------------
+#--------------------------ARR--------------------
+
+@app.get("/ask_arr")
+async def update_invoice(payload: Request):
+  values_dict = await payload.json()
+  #open DB
+  dbase = sqlite3.connect('database_group43.db', isolation_level=None)
+
+  query_product='''
+                SELECT Company.Company_ID, Product.Product_ID, Product.Product_CurrencyCode, Product.Product_Price, Quote.Quote_Quantity   
+                FROM Product
+                LEFT JOIN Company ON Company.Company_ID=Product.Company_ID
+                LEFT JOIN Subscription ON Subscription.Product_ID=Product.Product_ID
+                LEFT JOIN Quote ON Quote.Product_ID=Product.Product_ID 
+                WHERE Subscription.Subscription_Active=1
+                AND Company.Company_ID={Company_ID}
+                '''.format(
+                      Company_ID=str(values_dict['Company_ID']))
+  
+  print(query_product)
+  test_query=dbase.execute(query_product).fetchall()
+  print(test_query)
+  
+  companyid=str(values_dict['Company_ID'])
+  productid=[]
+  productcurrency=[]
+  productprice=[]
+  quotequantity=[]
+
+
+
+  for i in dbase.execute(query_product).fetchall():
+    productid.append(i[1])
+
+  for i in dbase.execute(query_product).fetchall():
+    productcurrency.append(i[2])
+
+
+  for i in dbase.execute(query_product).fetchall():
+    productprice.append(i[3])
+
+  
+  for i in dbase.execute(query_product).fetchall():
+    quotequantity.append(i[4])
+
+  print(productid,productcurrency,productprice,quotequantity)
+
+  currencies_and_sum = {str(row[2]): 0 for row in test_query}
+  for row in test_query:
+    currencies_and_sum[str(row[2])] += row[3] * row[4]
+
+
+  totalsales=[]
+  for cur in list(currencies_and_sum.items()):
+    print(str(cur[0]),cur[1])
+    totalsales.append(converter(str(cur[0]),cur[1]))
+  print(totalsales) 
+  print(sum(totalsales))
+  sumvar=sum(totalsales)*12
+
+
+
+
+
+  arr={
+
+    "ARR in EUR"       : (sumvar),
+   } 
+
+ 
+  print(json.dumps(arr, indent = 3))
+
+
+
+  
+  dbase.close()
+  return arr
+
+
+
+#-------------------------- 
+#--------------------------
+#--------------------------
+#--------------------------
+#--------------------------
+#--------------------------
+#--------------------------
+#--------------------------
+#--------------------------
+#--------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#-------------------------- # of customers & average annual revenue per customer
+#-------------------------- # of customers & average annual revenue per customer
+#-------------------------- # of customers & average annual revenue per customer
+#-------------------------- # of customers & average annual revenue per customer
+#-------------------------- # of customers & average annual revenue per customer
+#-------------------------- # of customers & average annual revenue per customer
+
+@app.get("/number_of_customers")
+async def update_invoice(payload: Request):
+  values_dict = await payload.json()
+  #open DB
+  dbase = sqlite3.connect('database_group43.db', isolation_level=None)
+
+  query_product='''
+                SELECT Company.Company_ID, Subscription.Subscription_ID  
+                FROM Product
+                LEFT JOIN Company ON Company.Company_ID=Product.Company_ID
+                LEFT JOIN Subscription ON Subscription.Product_ID=Product.Product_ID
+                LEFT JOIN Quote ON Quote.Product_ID=Product.Product_ID 
+                WHERE Subscription.Subscription_Active=1
+                AND Company.Company_ID={Company_ID}
+                '''.format(
+                      Company_ID=str(values_dict['Company_ID']))
+  
+  print(query_product)
+  test_query=dbase.execute(query_product).fetchall()
+  print(test_query)
+  
+  companyid=str(values_dict['Company_ID'])
+  
+  numberofsubs=[]
+  for i in test_query:
+    numberofsubs.append(i[1])
+  
+  print(numberofsubs)
+  productid=[]
+  productcurrency=[]
+  productprice=[]
+  quotequantity=[]
+
+  sumcus=len(numberofsubs)
+
+
+  query_product='''
+                SELECT Company.Company_ID, Product.Product_ID, Product.Product_CurrencyCode, Product.Product_Price, Quote.Quote_Quantity   
+                FROM Product
+                LEFT JOIN Company ON Company.Company_ID=Product.Company_ID
+                LEFT JOIN Subscription ON Subscription.Product_ID=Product.Product_ID
+                LEFT JOIN Quote ON Quote.Product_ID=Product.Product_ID 
+                WHERE Subscription.Subscription_Active=1
+                AND Company.Company_ID={Company_ID}
+                '''.format(
+                      Company_ID=str(values_dict['Company_ID']))
+  
+  print(query_product)
+  test_query=dbase.execute(query_product).fetchall()
+  print(test_query)
+  
+  companyid=str(values_dict['Company_ID'])
+
+
+  currencies_and_sum = {str(row[2]): 0 for row in test_query}
+  for row in test_query:
+    currencies_and_sum[str(row[2])] += row[3] * row[4]
+
+
+  totalsales=[]
+  for cur in list(currencies_and_sum.items()):
+    print(str(cur[0]),cur[1])
+    totalsales.append(converter(str(cur[0]),cur[1]))
+  print(totalsales) 
+  print(sum(totalsales))
+  sumvar=sum(totalsales)*12
+
+
+  averagerevenuepercustomer=sumvar/sumcus
+  revdetail={
+
+    "Total active customers"       : (sumcus),
+    "Average annual revenue per customer" : (averagerevenuepercustomer)
+   } 
+
+ 
+  print(json.dumps(revdetail, indent = 3))
+ 
+  dbase.close()
+  return revdetail
+
+
+
+
+
+
+
+@app.get("/customers_all")
+async def update_invoice(payload: Request):
+  values_dict = await payload.json()
+  #open DB
+  dbase = sqlite3.connect('database_group43.db', isolation_level=None)
+
+  query_customer='''
+                SELECT Customer.Customer_ID, Customer.Customer_Name, Customer.Customer_Surname, Subscription.Subscription_ID, Product.Product_Name, Company.Company_ID 
+                FROM Customer
+                LEFT JOIN Subscription ON Subscription.Customer_ID=Customer.Customer_ID
+                LEFT JOIN Product ON Product.Product_ID=Subscription.Product_ID
+                LEFT JOIN Company ON Company.Company_ID=Product.Company_ID
+                WHERE Subscription.Subscription_Active={active}
+                '''.format(active=str(values_dict['Subscription_Active']))
+  
+  print(query_customer)
+  test_query=dbase.execute(query_customer).fetchall()
+  print(test_query)
+  results = pd.read_sql_query(query_customer, dbase)
+  print(results)
+
+ 
+
+ 
+  dbase.close()
+  return True
 
 
 
