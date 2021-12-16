@@ -361,21 +361,25 @@ def Quote_recorder(
 def Subscription_recorder( 
         Subscription_Active, 
         Quote_ID,   
-        Customer_ID  
+        Customer_ID,
+        Product_ID  
         ):  
         dbase.execute('''
         INSERT INTO Subscription(
         Subscription_Active, 
         Quote_ID,   
-        Customer_ID 
+        Customer_ID,
+        Product_ID 
+
         )
-        VALUES(?,?,?)     
+        VALUES(?,?,?,?)     
         '''
         ,
         (  
         Subscription_Active, 
         Quote_ID,   
-        Customer_ID           
+        Customer_ID,
+        Product_ID           
         ))
 
 def Invoice_recorder( 
@@ -423,22 +427,9 @@ def Invoice_recorder(
 #---create a variable to be able to write down all the companies at once
 Company_List=[
 
-    ('Meta','USA','LA','San diego','FB street','368','1020','1364763834','128361726317823', 'Bank of America'),
-    ('Microsoft','USA','LA','San diego','MSFT street','369','1021','1364763835','128361726317824', 'Bank of America'),
-    ('Google','USA','LA','San diego','GOOGL street','370','1022','1364763836','128361726317824', 'Bank of America'),
-    ('Nvidia','USA','LA','San diego','NVDA street','371','1023','1364763837','128361726317825', 'Bank of America'),
-    ('Tesla','USA','TX','Houston','TSLA street','372','1024','1364763838','128361726317826', 'Bank of America'),
-    ('Oracle','USA','LA','San diego','ORCL street','373','1025','1364763839','128361726317827', 'Bank of America'),
-    ('Apple','USA','LA','San diego','AAPL street','374','1026','1364763840','128361726317828', 'Bank of America'),
-    ('Spotify','Sweden','Stockholm','Stockholm','Syndrome street','375','1027','1364763841','SE128361726317823', 'Bank of Sweden'),
-    ('Uber','USA','LA','San diego','UBER street','376','1028','1364763842','128361726317829', 'Bank of America'),
-    ('Lyft','USA','LA','San diego','LYFT street','377','1029','1364763843','128361726317830', 'Bank of America'),
-    ('Netflix','USA','LA','San diego','NFLX street','378','1030','1364763844','128361726317831', 'Bank of America'),
-    ('Klarna','Sweden','Stockholm','Stockholm','Syndrome street','379','1031','1364763845','SE128361726317824', 'Bank of Sweden'),
-    ('Dell','USA','LA','San diego','DELL street','380','1032','1364763846','128361726317832', 'Bank of America'),
-    ('UCLA','USA','LA','San diego','UCLA street','381','1033','1364763847','128361726317833', 'Bank of America')
+    ('company1','country1','state1','city1','street1','number1','postcode1','vatid1','bankaccount1', 'bank1')
     ]
-print("Company_List type : "+ str(type(Company_List)))
+
 #--- to import data in bulk 
 
 for Company_Name, Company_AddressCountry,Company_AddressState, Company_AddressCity,Company_AddressStreet,Company_AddressNumber,Company_AddressPostCode,Company_VATID, Company_BankAccNumber, Company_BankAccName in Company_List:
@@ -447,34 +438,8 @@ print('companies imported')
 
 
 Customer_List=[
-    ('email1@gmail.com','Wat', 'Myring','1997-1-1' , 'Thailand', None, 'Watthana Nakhon', 'Fordem', '54659', '34230', '56022266748153064'),
-    ('email2@gmail.com','Brook', 'Riby','1997-1-1' , 'Portugal', 'Viseu', 'Oliveirinha', 'South', '4', '3430-393', '3536866970807559'),
-    ('email3@gmail.com','Laureen', 'Hearsum','1997-1-1' , 'Indonesia', None, 'Margotuhu Kidul', 'Lakewood', '2664', None, '675967718400894959'),
-    ('email4@gmail.com','Kristal', 'Trenaman','1997-1-1' , 'Peru', None, 'Iberia', 'Londonderry', '666', None, '4911927251141051246'),
-    ('email5@gmail.com','Thayne', 'Blunsen','1997-1-1' , 'Colombia', None, 'Chipaque', 'Barnett', '02', '251808', '4041591408090802'),
-    ('email6@gmail.com','Marlyn', 'Guiso', '1997-1-1' ,'Indonesia', None, 'Banjaranyar', 'Jay', '29311', None, '3543136510685001'),
-    ('email7@gmail.com','Camille', 'Garrard', '1997-1-1' ,'Argentina', None, 'Loreto', 'Harper', '3', '3483', '3556920445064893'),
-    ('email8@gmail.com','Glenda', 'Aitchison', '1997-1-1' ,'Canada', 'Ontario', 'Amherstburg', 'Talisman', '7', 'N9V', '56022103672145941'),
-    ('email9@gmail.com','Lenora', 'Birnie', '1997-1-1' ,'Sweden', 'Jönköping', 'Habo', 'Ryan', '4111', '566 24', '6382656959235858'),
-    ('email10@gmail.com','Hercule', 'Scollan', '1997-1-1' ,'Finland', None, 'Längelmäki', 'Hansons', '87', '35400', '337941027101905'),
-    ('email11@gmail.com','Constantine', 'Ferrarello', '1997-1-1' ,'Indonesia', None, 'Gawanan', 'Independence', '6', None, '30391983169217'),
-    ('email12@gmail.com','Kacie', 'Courage', '1997-1-1' ,'Sweden', 'Västmanland', 'Västerås', 'Hintze', '3140', '721 19', '5602249221856159091'),
-    ('email13@gmail.com','Heindrick', 'Harvison', '1997-1-1' ,'Colombia', None, 'Combita', 'Pepper Wood', '31', '150208', '4405412890894504'),
-    ('email14@gmail.com','Julietta', 'Brockie', '1997-1-1' ,'Thailand', None, 'Si Narong', 'Fallview', '03840', '34000', '56022343096833660'),
-    ('email15@gmail.com','Selby', 'Chidlow', '1997-1-1' ,'Indonesia', None, 'Sukabumi', 'Lighthouse Bay', '35718', None, '3561611257886860'),
-    ('email51@gmail.com','Lottie', 'Everil','1997-1-1' , 'Indonesia', None, 'Bojongnangka', 'Burning Wood', '8', None, '3550982996750961'),
-    ('email31@gmail.com','Sherm', 'Caroli', '1997-1-1' ,'China', None, 'Muzi', 'Northfield', '5959', None, '201894388602867'),
-    ('email31@gmail.com','Pryce', 'Ratcliffe','1997-1-1' , 'Indonesia', None, 'Babantar', 'Marquette', '23', None, '5452721688390965'),
-    ('email15@gmail.com','Chaim', 'Dwire', '1997-1-1' ,'Russia', None, 'Krasnogvardeyets', 'Sugar', '40854', '102469', '633484956762995641'),
-    ('email13@gmail.com','Ginny', 'Kleewein', '1997-1-1' ,'Belarus', None, 'Loyew', 'Rieder', '05', None, '3580430987534600'),
-    ('email15@gmail.com','Janaya', 'Fidelus', '1997-1-1' ,'Philippines', None, 'Tartaro', 'Mcbride', '17', '2307', '5602217254492698'),
-    ('email13@gmail.com','Hinda', 'Pointing', '1997-1-1' ,'Brazil', None, 'Igaraçu do Tietê', 'Victoria', '27', '17350-000', '3559947835151565'),
-    ('email135@gmail.com','Georgie', 'Drydale', '1997-1-1' ,'Indonesia', None, 'Sukamaju', 'Dryden', '546', None, '4017958478018379'),
-    ('email1355@gmail.com','Edlin', 'Dondon','1997-1-1' , 'Gambia', None, 'Bambali', 'Bayside', '08209', None, '4844360692236524'),
-    ('email131@gmail.com','Kinna', 'Earey', '1997-1-1' ,'Senegal', None, 'Richard-Toll', 'Nobel', '71', None, '30343069592978'),
-    ('email13524@gmail.com','Skye', 'McKenzie', '1997-1-1' ,'Russia', None, 'Mikhaylovka', 'Melrose', '6', '613384', '677176040570466176'),
-    ('email14545@gmail.com','Arlan', 'Rentcome', '1997-1-1' ,'China', None, 'Yangxi', 'Autumn Leaf', '44', None, '4508428266017039')]
-print("Customer_List type : "+ str(type(Customer_List)))
+    ('email1@gmail.com','name1', 'surname1','birthday1' , 'country1', None, 'city1', 'street1', 'number1', 'postcode1', '56022266748153064')]
+
 
 
 for Customer_Email,Customer_Name, Customer_Surname, Customer_Birthdate, Customer_AddressCountry, Customer_AddressState, Customer_AddressCity, Customer_AddressStreet, Customer_AddressNumber, Customer_AddressPostCode, Customer_CCNumber in Customer_List:
@@ -504,35 +469,14 @@ print('customers imported')
 
 
 Product_List=[
-    ('testproduct','GBP',20,1),
-    ('Office365','EUR',25,3),
-    ('Office365','TRY',42,3),
-    ('Office365','USD',25,3),
-    ('Netflix','USD',25,3),
-    ('Office365','EUR',32,3),
-    ('Office365','GBP',25,2),
-    ('Spotify','GBP',25,1),
-    ('Office365','GBP',25,3),
-    ('Youtube','GBP',66,6),
-    ('Office365','EUR',25,3),
-    ('BlaBla','EUR',99,8)
+    ('product1','GBP',1,1)
 ]
 for Product_Name, Product_CurrencyCode, Product_Price, Company_ID in Product_List:
     Product_recorder(Product_Name, Product_CurrencyCode, Product_Price, Company_ID)
 
 
 Quote_List=[
-    (2,"2021-01-01",2,4),
-    (2,"2021-01-01",2,4),
-    (4,"2021-01-01",2,4),
-    (5,"2021-01-01",2,4),
-    (1,"2021-01-01",2,4),
-    (1,"2021-01-01",2,4),
-    (1,"2021-01-01",2,4),
-    (1,"2021-01-01",2,4),
-    (1,"2021-01-01",2,4),
-    (1,"2021-01-01",2,4),   
-    (1,"2021-01-01",2,4)     
+    (1,"2021-01-01",1,1)     
 ]
 for Quote_Quantity, Quote_Date, Product_ID, Customer_ID in Quote_List:
     Quote_recorder(Quote_Quantity, Quote_Date, Product_ID, Customer_ID)
@@ -540,35 +484,14 @@ for Quote_Quantity, Quote_Date, Product_ID, Customer_ID in Quote_List:
 
 
 Subscription_List=[
-    (1,2,1),
-    (0,2,2),
-    (1,2,3),
-    (0,2,4),
-    (1,2,5),
-    (1,2,6),
-    (1,2,7),
-    (1,2,8),
-    (1,2,9),
-    (1,2,10),   
-    (1,2,11)     
+    (1,1,1,1)    
 ]
-for Subscription_Active,Quote_Quantity, Customer_ID in Subscription_List:
-    Subscription_recorder(Subscription_Active,Quote_Quantity, Customer_ID)
+for Subscription_Active,Quote_Quantity, Customer_ID, Product_ID in Subscription_List:
+    Subscription_recorder(Subscription_Active,Quote_Quantity, Customer_ID, Product_ID)
 
 
 Invoice_List=[
-    (1,"2021-1-1",2,4),
-    (0,"2021-1-1",2,4),
-    (1,"2021-1-1",2,4),
-    (0,"2021-1-1",2,4),
-    (1,"2021-1-1",2,4),
-    (1,"2021-1-1",2,4),
-    (1,"2021-1-1",2,4),
-    (1,"2021-1-1",2,4),
-    (1,"2021-1-1",2,4),
-    (1,"2021-1-1",2,4),   
-    (1,"2021-1-1",2,4)     
-]
+    (1,"2021-1-1",1,1)]
 for Invoice_Paid, Invoice_PaidDate, Customer_ID, Subscription_ID in Invoice_List:
     Invoice_recorder(Invoice_Paid, Invoice_PaidDate, Customer_ID, Subscription_ID)
 
