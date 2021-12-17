@@ -9,6 +9,7 @@ import pandas as pd
 import datetime
 import json
 import requests
+from database_rest_and_creation import Subscription_ID
 from exchangerateAPI import converter 
 
 app = FastAPI()
@@ -84,7 +85,10 @@ async def create_company_account(payload: Request):
    "Company_BankAccNumber"   :               str(values_dict["Company_BankAccNumber"])
   }
 
-  print(json.dumps(companyrecorded, indent = 3))
+
+ 
+
+  print(json.dumps(companyrecorded, indent = 1))
 
 
   dbase.close()
@@ -368,7 +372,7 @@ async def convert_quote_to_subscription(payload: Request):
 
   insert_into='''
               INSERT INTO Subscription(Quote_ID,Customer_ID,Company_ID,Product_ID)
-              VALUES({Customer_ID},{Quote_ID},{Company_ID},{Product_ID})
+              VALUES({Quote_ID},{Customer_ID},{Company_ID},{Product_ID})
               '''.format(Customer_ID = str(values_dict["Customer_ID"]),
         Quote_ID=str(values_dict["Quote_ID"]),
         Company_ID=str(comapnyid),
@@ -544,22 +548,10 @@ async def create_invoice(payload: Request):
   values_dict = await payload.json()
   #open DB
   dbase = sqlite3.connect('database_group43.db', isolation_level=None)
-  query_active_subs ='''
-                    SELECT Subscription.Subscription_ID 
-                    FROM Subscription
-                    WHERE Subscription_Active = 1 
-                    AND Subscription.Customer_ID = {Customer_ID}
-                    '''.format(Customer_ID=values_dict['Customer_ID'])
-  print(query_active_subs)
-  a=dbase.execute(query_active_subs).fetchall()
-  print(a)
 
-  if len(a)==0:
-    print("This customer does not have a subscription")
-    return 'This customer does not have a subscription'
-    
-  
-  subscriptionid=a[0][0]
+      
+  values=str(values_dict['Subscription_ID'])
+  subscriptionid=values[0][0]
 
 
 
@@ -770,6 +762,8 @@ async def update_invoice(payload: Request):
   print(a)
 
   paidstatusornot=a[0][1]
+  print(paidstatusornot)
+  
 
   if not paidstatusornot:
     print("Customer doesn't have any pending Invoice")

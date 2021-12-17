@@ -3,14 +3,14 @@ POST http://127.0.0.1:8000/create_company_account HTTP/1.1
 Content-Type: application/json
 
 { 
- "Company_Name"            :   "Company4",
+ "Company_Name"            :   "Company5",
  "Company_AddressCountry"  :   "Country4",
  "Company_AddressState"    :   "State4",
  "Company_AddressCity"     :   "City4",
  "Company_AddressStreet"   :   "street4",
  "Company_AddressNumber"   :   "number4",
  "Company_AddressPostCode" :   "postcode4",
- "Company_VATID"           :   "vatid4",
+ "Company_VATID"           :   "vatid5",
  "Company_BankAccName"     :   "bank4",
  "Company_BankAccNumber"   :   "banknumber4"
 }
@@ -50,7 +50,7 @@ Content-Type: application/json
  "Company_ID"                 : "4",
  "Quote_Quantity"             : "4",
  "Quote_Date"                 : "2021-01-04",
- "Customer_Email"             : "email4@gmail.com"
+ "Customer_Email"             : "email1@gmail.com"
 }
 
 ###
@@ -60,8 +60,8 @@ POST http://127.0.0.1:8000/accept_quote HTTP/1.1
 Content-Type: application/json
 
 {
- "Quote_ID"               : "5",
- "Customer_ID"              : "3"
+ "Quote_ID"               : "2",
+ "Customer_ID"              : "1"
 }
 ###
 
@@ -70,7 +70,8 @@ POST http://127.0.0.1:8000/create_invoice HTTP/1.1
 Content-Type: application/json
 
 {
- "Customer_ID"              : "3"
+ "Customer_ID"              : "1",
+ "Subscription_ID"          : "3"
 }
 ###
 
@@ -81,8 +82,8 @@ POST http://127.0.0.1:8000/update_invoice HTTP/1.1
 Content-Type: application/json
 
 {
- "Customer_ID"              : "2",
- "Subscription_ID"          : "2",
+ "Customer_ID"              : "1",
+ "Subscription_ID"          : "1",
  "Invoice_PaidDate"         : "2021-01-02"
 }
 ###

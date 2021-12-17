@@ -80,7 +80,7 @@ c.execute('''
         Customer_Email               TEXT NOT NULL,
         Customer_Name                TEXT NOT NULL,
         Customer_Surname             TEXT NOT NULL,
-        Customer_Birthdate           DATE,
+        Customer_Birthdate           DATE NOT NULL,
         Customer_AddressCountry      TEXT NOT NULL,
         Customer_AddressState        TEXT,
         Customer_AddressCity         TEXT NOT NULL,
@@ -449,7 +449,7 @@ Company_List=[
 
 for Company_Name, Company_AddressCountry,Company_AddressState, Company_AddressCity,Company_AddressStreet,Company_AddressNumber,Company_AddressPostCode,Company_VATID, Company_BankAccNumber, Company_BankAccName in Company_List:
     record_a_new_company(Company_Name, Company_AddressCountry,Company_AddressState, Company_AddressCity,Company_AddressStreet,Company_AddressNumber,Company_AddressPostCode,Company_VATID, Company_BankAccNumber,Company_BankAccName)
-print('companies imported')
+print('Sample Company imported.')
 
 
 Customer_List=[
@@ -459,7 +459,7 @@ Customer_List=[
 
 for Customer_Email,Customer_Name, Customer_Surname, Customer_Birthdate, Customer_AddressCountry, Customer_AddressState, Customer_AddressCity, Customer_AddressStreet, Customer_AddressNumber, Customer_AddressPostCode, Customer_CCNumber in Customer_List:
     record_a_new_customer(Customer_Email,Customer_Name, Customer_Surname, Customer_Birthdate, Customer_AddressCountry, Customer_AddressState, Customer_AddressCity, Customer_AddressStreet, Customer_AddressNumber, Customer_AddressPostCode, Customer_CCNumber)
-print('customers imported')
+print('Sample customer imported')
 
 
 
@@ -510,7 +510,7 @@ Invoice_List=[
 for Invoice_Paid, Invoice_PaidDate, Customer_ID, Subscription_ID,Company_ID in Invoice_List:
     Invoice_recorder(Invoice_Paid, Invoice_PaidDate, Customer_ID, Subscription_ID,Company_ID)
 
-
+print("Sample invoice imported")
 
 #-------------To close the database-------------
 dbase.close()
