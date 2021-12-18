@@ -317,6 +317,7 @@ async def review_quote(payload: Request):
               
                 Product_ID=str(values_dict['Product_ID']))
   product=dbase.execute(query_prduct).fetchall()
+  
   productname=product[0][0]
   productcurrency=product[0][1]
   productprice=product[0][2]  
