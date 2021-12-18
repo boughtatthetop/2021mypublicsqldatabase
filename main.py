@@ -417,7 +417,9 @@ async def review_quote(payload: Request):
 async def convert_quote_to_subscription(payload: Request):
   values_dict = await payload.json()
   #open DB
-  dbase = sqlite3.connect('database_group43.db', isolation_level=None)                                         
+  dbase = sqlite3.connect('database_group43.db', isolation_level=None) 
+  ref=dbase.execute("PRAGMA foreign_keys = 1")
+  print(ref)                                        
   get_companyid=''' 
       SELECT Quote.Company_ID, Quote.Product_ID FROM Quote 
       WHERE Quote_ID={Quote_ID}
@@ -426,19 +428,27 @@ async def convert_quote_to_subscription(payload: Request):
   print(get_companyid)
   
   comapnyid=dbase.execute(get_companyid).fetchall()[0][0]
+  print(comapnyid)
+
   productid=dbase.execute(get_companyid).fetchall()[0][1]
-  
+  print(productid)
 
 
 
 
   insert_into='''
-              INSERT INTO Subscription(Quote_ID,Customer_ID,Company_ID,Product_ID)
-              VALUES({Quote_ID},{Customer_ID},{Company_ID},{Product_ID})
+              INSERT INTO Subscription(
+                Quote_ID,
+                Customer_ID,
+                Company_ID,
+                Product_ID,
+                Subscription_Active)
+              VALUES({Quote_ID},{Customer_ID},{Company_ID},{Product_ID},{Subscription_Active})
               '''.format(Customer_ID = str(values_dict["Customer_ID"]),
         Quote_ID=str(values_dict["Quote_ID"]),
         Company_ID=str(comapnyid),
-        Product_ID=str(productid))
+        Product_ID=str(productid),
+        Subscription_Active=0)
   dbase.execute(insert_into)
 
 
@@ -468,39 +478,7 @@ async def convert_quote_to_subscription(payload: Request):
   sub=dbase.execute(get_sub).fetchall()[0][0]
   print(sub)
 
-  get_companyid=''' 
-      SELECT Product.Company_ID FROM Product 
-      WHERE Product_ID={Product_ID}
-      '''.format(
-               Product_ID=str(productid))
-  print(get_companyid)
-  
-  comapnyid=dbase.execute(get_companyid).fetchall()[0][0]
 
-
-
-
-
-  update_sub='''
-      INSERT INTO Subscription(
-      Quote_ID,
-      Customer_ID,
-      Product_ID,
-      Company_ID
-      )
-      VALUES(
-      {Quote_ID},
-      {Customer_ID},
-      {Product_ID},
-      {Company_ID}
-      )
-    '''.format(
-        Quote_ID=str(values_dict["Quote_ID"]),
-        Customer_ID=str(values_dict["Customer_ID"]),
-        Product_ID=str(productid),
-        Company_ID=str(comapnyid)
-    )
-  dbase.execute(update_sub)
   accept_sub='''
       UPDATE Subscription 
       SET Subscription_Active = 1 
@@ -513,6 +491,13 @@ async def convert_quote_to_subscription(payload: Request):
       )
   print(accept_sub)
   dbase.execute(accept_sub)
+
+
+
+
+
+
+  
   query_name='''SELECT Customer.Customer_Name, Customer.Customer_Surname
                 FROM Customer
                 WHERE Customer_ID="{Customer_ID}"
