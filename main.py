@@ -265,7 +265,6 @@ async def review_product(payload: Request):
                   Company_ID=str(companyid)
                 )
   dbase.execute(query_new_product)
-
   dbase.close()
   return "New Product has been recorded "
 
@@ -298,9 +297,10 @@ async def review_quote(payload: Request):
   values_dict = await payload.json()
   #open DB
   dbase = sqlite3.connect('database_group43.db', isolation_level=None)
+  ref=dbase.execute("PRAGMA foreign_keys = 1")
+  print(ref)
 
-
-  #Finding Product in our database
+#Finding Product in our database
   query_prduct='''  
               SELECT Product_Name,Product_CurrencyCode,Product_Price 
               FROM Product
@@ -312,6 +312,16 @@ async def review_quote(payload: Request):
   productname=product[0][0]
   productcurrency=product[0][1]
   productprice=product[0][2]  
+
+# find company ID 
+  query_companyid='''SELECT Company_ID 
+                  FROM Product 
+                  WHERE Product_ID={Product_ID}
+                  '''.format(Product_ID=str(values_dict['Product_ID']))
+  print(query_companyid)
+  dbase.execute(query_companyid)
+  companyid=dbase.execute(query_companyid).fetchall()[0][0]
+  print(companyid)
 
 
 #--- filter for cusomter_id using the email
@@ -331,7 +341,7 @@ async def review_quote(payload: Request):
   print(customerid)
 
 #--- record the quote
-  query_quote='''
+  create_quote='''
               INSERT INTO Quote(
                 Quote_Quantity,
                 Quote_Date,
@@ -347,27 +357,28 @@ async def review_quote(payload: Request):
                     Quote_Quantity=str(values_dict['Quote_Quantity']),
                     Quote_Date=str(values_dict['Quote_Date']),
                     Product_ID=str(values_dict['Product_ID']),
-                    Customer_ID=str(customerid))
-  print(query_quote)
-  results_quote=(dbase.execute(query_quote).fetchall())
+                    Customer_ID=str(customerid),
+                    Company_ID=str(companyid))
+  print(create_quote)
+  results_quote=(dbase.execute(create_quote).fetchall())
   print(results_quote)
 
   last_quote='''SELECT * FROM Quote ORDER BY Quote_ID DESC LIMIT 1'''
   last_quoate_print=dbase.execute(last_quote).fetchall()
   print(last_quoate_print)
 
-  VAT=float(values_dict['Product_Price'])*0.21
+  VAT=float(productprice)*0.21
   print(VAT)
-  VAT_Excluded=float(values_dict['Product_Price'])
-  VAT_Included=float(values_dict['Product_Price'])*1.21
+  VAT_Excluded=float(productprice)
+  VAT_Included=float(productprice)*1.21
 
 
   quote_print={
-  "Product_Name"               : str(values_dict['Product_Name']),
-  "Product_CurrencyCode"       : str(values_dict['Product_CurrencyCode']),
-  "Product_Price"              : float(values_dict['Product_Price']),
-  "Product_Price_VAT_Included" :float(values_dict['Product_Price'])*1.21,
-  "Company_ID"                 : (values_dict['Company_ID']),
+  "Product_Name"               : str(productname),
+  "Product_CurrencyCode"       : str(productcurrency),
+  "Product_Price"              : float(productprice),
+  "Product_Price_VAT_Included" :float(productprice)*1.21,
+
   "Quote_Quantity"             : (values_dict['Quote_Quantity']),
   "Quote_Date"                 : str(values_dict['Quote_Date']),
   "Customer_Email"             : str(values_dict['Customer_Email'])

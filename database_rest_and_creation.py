@@ -146,7 +146,7 @@ dbase.execute('''
         
         FOREIGN KEY(Company_ID)REFERENCES Company(Company_ID), 
         FOREIGN KEY(Product_ID) REFERENCES Product(Product_ID),
-        FOREIGN KEY(Customer_ID) REFERENCES Quote(Customer_ID)
+        FOREIGN KEY(Customer_ID) REFERENCES Customer(Customer_ID)
     )    
     ''')
 print("Quote table created")
