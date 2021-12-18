@@ -1101,7 +1101,10 @@ async def update_invoice(payload: Request):
   values_dict = await payload.json()
   #open DB
   dbase = sqlite3.connect('database_group43.db', isolation_level=None)
+  ref=dbase.execute("PRAGMA foreign_keys = 1")
+  print(ref) 
 
+#to get product detais and quantity for company with active subs
   query_product='''
                 SELECT Company.Company_ID, Subscription.Subscription_ID  
                 FROM Product
@@ -1124,26 +1127,20 @@ async def update_invoice(payload: Request):
     numberofsubs.append(i[1])
   
   print(numberofsubs)
-  productid=[]
-  productcurrency=[]
-  productprice=[]
-  quotequantity=[]
 
   sumcus=len(numberofsubs)
 
-
   averagerevenuepercustomer=sumcus
-  revdetail={
+  numberofcustomer={
 
     "Total active customers"       : (sumcus),
 
    } 
-
  
-  print(json.dumps(revdetail, indent = 3))
+  print(json.dumps(numberofcustomer, indent = 3))
  
   dbase.close()
-  return revdetail
+  return numberofcustomer
 
 
 
