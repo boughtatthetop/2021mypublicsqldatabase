@@ -1069,7 +1069,7 @@ async def ask_arr(payload: Request):
   for cur in list(currencies_and_sum.items()):
     print(str(cur[0]),cur[1])
     totalsales.append(converter(str(cur[0]),cur[1]))
-    print(totalsales.append(converter(str(cur[0]),cur[1])))
+    totalsales.append(converter(str(cur[0]),cur[1]))
 
   print(totalsales) 
   print(sum(totalsales))

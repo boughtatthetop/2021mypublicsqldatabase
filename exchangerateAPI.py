@@ -1,13 +1,25 @@
 import requests
-url = 'https://v6.exchangerate-api.com/v6/405afebcba497e0aa9ef8c7e/pair/EUR/{}/{}'
+
+from dotenv import load_dotenv
+import os
+load_dotenv()
+
+#environment variables
+# Code of your application, which uses environment variables (e.g. from `os.environ` or
+# `os.getenv`) as if they came from the actual environment.
+
+APIKEY=os.getenv("APIKEY")
+
+
 
 def converter(currency,amounttotal):
+    url = f'https://v6.exchangerate-api.com/v6/{APIKEY}/pair/{currency}/EUR/{amounttotal}'
     amountconverter= requests.get(url.format(currency,amounttotal)).json()
     amountEUR=amountconverter["conversion_result"]
     return amountEUR
 
-#EURamount=converter("USD",'1')
-#print('EUR '+ str(EURamount))
+EURamount=converter("USD",'1')
+print('EUR '+ str(EURamount))
 
 #print(requests.get('https://v6.exchangerate-api.com/v6/TOKEN/pair/EUR/USD/123132.3123123').json()['conversion_result'])
 
