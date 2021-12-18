@@ -123,11 +123,11 @@ Content-Type: application/json
 
 
 
-GET http://127.0.0.1:8000/number_of_customers HTTP/1.1
+GET http://127.0.0.1:8000/number_of_customers_and_revenue HTTP/1.1
 Content-Type: application/json
 
 {
-    "Company_ID" : "6"
+    "Company_ID" : "1"
 }
 
 ###

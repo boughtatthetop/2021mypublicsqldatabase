@@ -1096,7 +1096,7 @@ async def update_invoice(payload: Request):
 #-------------------------- # of customers & average annual revenue per customer
 #-------------------------- # of customers & average annual revenue per customer
 
-@app.get("/number_of_customers")
+@app.get("/number_of_customers_and_revenue")
 async def update_invoice(payload: Request):
   values_dict = await payload.json()
   #open DB
@@ -1104,7 +1104,7 @@ async def update_invoice(payload: Request):
   ref=dbase.execute("PRAGMA foreign_keys = 1")
   print(ref) 
 
-#to get product detais and quantity for company with active subs
+#to get number of customers using company id with active sub
   query_product='''
                 SELECT Company.Company_ID, Subscription.Subscription_ID  
                 FROM Product
@@ -1130,17 +1130,49 @@ async def update_invoice(payload: Request):
 
   sumcus=len(numberofsubs)
 
-  averagerevenuepercustomer=sumcus
-  numberofcustomer={
+#to get product detais and quantity  
+  query_product='''
+                SELECT Company.Company_ID, Product.Product_ID, Product.Product_CurrencyCode, Product.Product_Price, Quote.Quote_Quantity   
+                FROM Product
+                LEFT JOIN Company ON Company.Company_ID=Product.Company_ID
+                LEFT JOIN Subscription ON Subscription.Product_ID=Product.Product_ID
+                LEFT JOIN Quote ON Quote.Product_ID=Product.Product_ID 
+                WHERE Subscription.Subscription_Active=1
+                AND Company.Company_ID={Company_ID}
+                '''.format(
+                      Company_ID=str(values_dict['Company_ID']))
+  
+  print(query_product)
+  test_query=dbase.execute(query_product).fetchall()
+  print(test_query)
 
-    "Total active customers"       : (sumcus),
+#to create a dictionary and summing all the amounts corresponding to their currency code
+  currencies_and_sum = {str(row[2]): 0 for row in test_query}
+  for row in test_query:
+    currencies_and_sum[str(row[2])] += row[3] * row[4]
+
+#to iterate through list and use external API to iterate and convert
+  totalsales=[]
+  for cur in list(currencies_and_sum.items()):
+    print(str(cur[0]),cur[1])
+    totalsales.append(converter(str(cur[0]),cur[1]))
+  print(totalsales) 
+  print(sum(totalsales))
+  sumvar=sum(totalsales)*12
+
+
+
+  averagerevenuepercustomer=sumvar/sumcus
+  printrevpercustomer={
+
+    "Average annual revenue per customer"       : (averagerevenuepercustomer),
 
    } 
  
-  print(json.dumps(numberofcustomer, indent = 3))
+  print(json.dumps(printrevpercustomer, indent = 3))
  
   dbase.close()
-  return numberofcustomer
+  return printrevpercustomer
 
 
 
@@ -1153,7 +1185,10 @@ async def update_invoice(payload: Request):
   values_dict = await payload.json()
   #open DB
   dbase = sqlite3.connect('database_group43.db', isolation_level=None)
+  ref=dbase.execute("PRAGMA foreign_keys = 1")
+  print(ref) 
 
+#to get customer detais and quantity for company with active subs
   query_customer='''
                 SELECT Customer.Customer_ID, Customer.Customer_Name, Customer.Customer_Surname, Subscription.Subscription_ID, Product.Product_Name, Company.Company_ID 
                 FROM Customer
