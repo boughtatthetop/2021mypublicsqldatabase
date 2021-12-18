@@ -42,6 +42,9 @@ async def create_company_account(payload: Request):
   dbase = sqlite3.connect('database_group43.db', isolation_level=None)
   ref=dbase.execute("PRAGMA foreign_keys = 1")
   print(ref)
+
+
+#check if vat_id exists
   companies_with_this_vat=dbase.execute('''
     SELECT Company_ID FROM Company
     WHERE Company_VATID=?
@@ -53,6 +56,7 @@ async def create_company_account(payload: Request):
     print("Company is already registered")
     return "Company is already registered"
 
+#insert into company
   aaaa=dbase.execute('''INSERT INTO Company(
                       Company_Name,
                       Company_AddressCountry,
@@ -128,6 +132,7 @@ async def create_customer_account(payload: Request):
   ref=dbase.execute("PRAGMA foreign_keys = 1")
   print(ref)
   
+#check if customer exists
   customers_with_this_email=dbase.execute('''
     SELECT Customer_ID FROM Customer
     WHERE Customer_Email=?
@@ -148,6 +153,9 @@ async def create_customer_account(payload: Request):
     print("Credit card number is not valid")
     return "Credit card number is not valid"
 
+
+
+#insert into customer
   dbase.execute('''
         INSERT INTO Customer(
         Customer_Email,
@@ -226,7 +234,7 @@ async def review_product(payload: Request):
   print(ref)
   #To post a quote company enters its product details and id
   
-  #Finding Company in our database
+#Finding Company in our database with payload vat_id 
 
   query_companyid='''SELECT Company_ID 
                   FROM Company 
@@ -237,13 +245,13 @@ async def review_product(payload: Request):
   print(companyidlist)
 
 
-  
+#check if company exists  
   if not companyidlist:
       return "This company does not exists in our databse"
 
   companyid=companyidlist[0][0]
 
-
+#record prodcut for company
   query_new_product='''
                 INSERT INTO Product(
                   Product_Name,
@@ -300,7 +308,7 @@ async def review_quote(payload: Request):
   ref=dbase.execute("PRAGMA foreign_keys = 1")
   print(ref)
 
-#Finding Product in our database
+#Finding Product in our database with payload Product_ID
   query_prduct='''  
               SELECT Product_Name,Product_CurrencyCode,Product_Price 
               FROM Product
@@ -363,16 +371,23 @@ async def review_quote(payload: Request):
   results_quote=(dbase.execute(create_quote).fetchall())
   print(results_quote)
 
+
+#to show in terminal if quote created or not
   last_quote='''SELECT * FROM Quote ORDER BY Quote_ID DESC LIMIT 1'''
   last_quoate_print=dbase.execute(last_quote).fetchall()
   print(last_quoate_print)
 
+
+
+
+#calculations of price and total price including vat 
   VAT=float(productprice)*0.21
   print(VAT)
   VAT_Excluded=float(productprice)
   VAT_Included=float(productprice)*1.21
 
 
+#to send to api
   quote_print={
   "Product_Name"               : str(productname),
   "Product_CurrencyCode"       : str(productcurrency),
@@ -419,7 +434,9 @@ async def convert_quote_to_subscription(payload: Request):
   #open DB
   dbase = sqlite3.connect('database_group43.db', isolation_level=None) 
   ref=dbase.execute("PRAGMA foreign_keys = 1")
-  print(ref)                                        
+  print(ref)  
+
+#find company_ID and product_ID with given Payload Quote_ID                                      
   get_companyid=''' 
       SELECT Quote.Company_ID, Quote.Product_ID FROM Quote 
       WHERE Quote_ID={Quote_ID}
@@ -433,9 +450,7 @@ async def convert_quote_to_subscription(payload: Request):
   productid=dbase.execute(get_companyid).fetchall()[0][1]
   print(productid)
 
-
-
-
+#Insert into subscription 
   insert_into='''
               INSERT INTO Subscription(
                 Quote_ID,
@@ -445,80 +460,23 @@ async def convert_quote_to_subscription(payload: Request):
                 Subscription_Active)
               VALUES({Quote_ID},{Customer_ID},{Company_ID},{Product_ID},{Subscription_Active})
               '''.format(Customer_ID = str(values_dict["Customer_ID"]),
-        Quote_ID=str(values_dict["Quote_ID"]),
-        Company_ID=str(comapnyid),
-        Product_ID=str(productid),
-        Subscription_Active=0)
+                         Quote_ID=str(values_dict["Quote_ID"]),
+                         Company_ID=str(comapnyid),
+                         Product_ID=str(productid),
+                         Subscription_Active=1)
   dbase.execute(insert_into)
 
-
-
-
-
-
-
-  get_sub=''' 
-      SELECT Subscription.Subscription_ID FROM Subscription 
-      WHERE Subscription.Customer_ID={Customer_ID}
-      AND Subscription.Quote_ID={Quote_ID}
-      '''.format(
-        Customer_ID = str(values_dict["Customer_ID"]),
-        Quote_ID=str(values_dict["Quote_ID"]))
-  print(get_sub)
-  
-  sub=dbase.execute(get_sub).fetchall()
-  print(sub)
-  if len(sub)==0:
-    print("This Customer has not recieved a quote to accept on this product")
-    return "This Customer has not recieved a quote to accept on this product"
-  elif sub[0][0]==None:
-    print("This Customer has not recieved a quote to accept on this product")
-    return "This Customer has not recieved a quote to accept on this product"
-
-  sub=dbase.execute(get_sub).fetchall()[0][0]
-  print(sub)
-
-
-  accept_sub='''
-      UPDATE Subscription 
-      SET Subscription_Active = 1 
-      WHERE Subscription_ID = {Subscription_ID}
-      AND Customer_ID = {Customer_ID}      
-      '''.format( 
-        Subscription_ID=str(sub),
-        Customer_ID=str(values_dict["Customer_ID"])
-        
-      )
-  print(accept_sub)
-  dbase.execute(accept_sub)
-
-
-
-
-
-
-  
-  query_name='''SELECT Customer.Customer_Name, Customer.Customer_Surname
+#retrieving data for api feedback
+  query_name='''SELECT Customer.Customer_Name, Customer.Customer_Surname, Customer.Customer_Email
                 FROM Customer
                 WHERE Customer_ID="{Customer_ID}"
                 '''.format(Customer_ID=str(values_dict['Customer_ID']))
   query_customer_name_surname=dbase.execute(query_name).fetchall()
   name=query_customer_name_surname[0][0]
   surname=query_customer_name_surname[0][1]
+  customeremail=query_customer_name_surname[0][2]
 
   print("Customer {} {} has accepted the quote".format(name,surname))
-
-  customer_email_query='''SELECT Customer_Email FROM Customer 
-                          WHERE Customer_ID={Customer_ID}'''.format(
-                            Customer_ID=str(values_dict['Customer_ID']))
-  customeremail=dbase.execute(customer_email_query).fetchall()[0][0]
-  query_name='''SELECT Customer.Customer_Name, Customer.Customer_Surname
-                FROM Customer
-                WHERE Customer_ID="{Customer_ID}"
-                '''.format(Customer_ID=str(values_dict['Customer_ID']))
-  query_customer_name_surname=dbase.execute(query_name).fetchall()
-  name=query_customer_name_surname[0][0]
-  surname=query_customer_name_surname[0][1]
 
   query_prduct='''  
               SELECT Product_Name,Product_CurrencyCode,Product_Price 
@@ -542,6 +500,7 @@ async def convert_quote_to_subscription(payload: Request):
   quantity=dbase.execute(query_quote).fetchall()[0][0]
   quotedate=dbase.execute(query_quote).fetchall()[0][1]
 
+#to send to api 
   customeraccepted={
    'Customer_Email'           :   customeremail,            
    'Customer_Name'            :   name,     
@@ -595,12 +554,11 @@ async def create_invoice(payload: Request):
   values_dict = await payload.json()
   #open DB
   dbase = sqlite3.connect('database_group43.db', isolation_level=None)
-
+  ref=dbase.execute("PRAGMA foreign_keys = 1")
+  print(ref)  
       
   values=str(values_dict['Subscription_ID'])
   subscriptionid=values[0][0]
-
-
 
   get_companyid=''' 
       SELECT Subscription.Company_ID FROM Subscription 
@@ -611,19 +569,19 @@ async def create_invoice(payload: Request):
   
   comapnyid=dbase.execute(get_companyid).fetchall()[0][0]
 
-
-
   query_insert_invoice='''
                     INSERT INTO Invoice(
                       Customer_ID,
                       Subscription_ID,
-                      Company_ID
+                      Company_ID,
+                      Invoice_Paid
                     ) 
-                    VALUES({Customer_ID},{Subscription_ID},{Company_ID})       
+                    VALUES({Customer_ID},{Subscription_ID},{Company_ID},{Invoice_Paid})       
                     '''.format(
                       Customer_ID=str(values_dict['Customer_ID']),
                       Subscription_ID=str(subscriptionid),
-                      Company_ID=str(comapnyid)
+                      Company_ID=str(comapnyid),
+                      Invoice_Paid=0
                     )
   print(query_insert_invoice)
   insert_invoice=dbase.execute(query_insert_invoice).fetchall()

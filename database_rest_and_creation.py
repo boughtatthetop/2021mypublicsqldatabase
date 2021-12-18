@@ -175,7 +175,7 @@ dbase.execute('''
         Invoice_ID                  INTEGER PRIMARY KEY AUTOINCREMENT,
         
         Invoice_Paid                BOOLEAN NOT NULL,
-        Invoice_PaidDate            DATE    NOT NULL,       
+        Invoice_PaidDate            DATE            ,       
         Customer_ID                 INTEGER NOT NULL,
         Subscription_ID             INTEGER NOT NULL,
         Company_ID                  INTEGER NOT NULL, 
