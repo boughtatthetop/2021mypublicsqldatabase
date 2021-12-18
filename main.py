@@ -905,7 +905,7 @@ async def update_invoice(payload: Request):
 #---------------GET MRR ------------------------
 
 @app.get("/ask_mrr")
-async def update_invoice(payload: Request):
+async def ask_mrr(payload: Request):
   values_dict = await payload.json()
   #open DB
   dbase = sqlite3.connect('database_group43.db', isolation_level=None)
@@ -1013,7 +1013,7 @@ async def update_invoice(payload: Request):
 #--------------------------ARR--------------------
 
 @app.get("/ask_arr")
-async def update_invoice(payload: Request):
+async def ask_arr(payload: Request):
   values_dict = await payload.json()
   #open DB
   dbase = sqlite3.connect('database_group43.db', isolation_level=None)
@@ -1120,7 +1120,7 @@ async def update_invoice(payload: Request):
 #-------------------------- # of customers & average annual revenue per customer
 
 @app.get("/number_of_customers_and_revenue")
-async def update_invoice(payload: Request):
+async def number_of_customers_and_revenue(payload: Request):
   values_dict = await payload.json()
   #open DB
   dbase = sqlite3.connect('database_group43.db', isolation_level=None)
@@ -1208,7 +1208,7 @@ async def update_invoice(payload: Request):
 
 
 @app.get("/customers_all")
-async def update_invoice(payload: Request):
+async def customers_all(payload: Request):
   values_dict = await payload.json()
   #open DB
   dbase = sqlite3.connect('database_group43.db', isolation_level=None)
