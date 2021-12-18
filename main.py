@@ -1059,14 +1059,18 @@ async def ask_arr(payload: Request):
 
 #to create a dictionary and summing all the amounts corresponding to their currency code
   currencies_and_sum = {str(row[2]): 0 for row in test_query}
+  print(currencies_and_sum)
   for row in test_query:
     currencies_and_sum[str(row[2])] += row[3] * row[4]
+    print(currencies_and_sum)
 
 #to iterate through list and use external API to iterate and convert
   totalsales=[]
   for cur in list(currencies_and_sum.items()):
     print(str(cur[0]),cur[1])
     totalsales.append(converter(str(cur[0]),cur[1]))
+    print(totalsales.append(converter(str(cur[0]),cur[1])))
+
   print(totalsales) 
   print(sum(totalsales))
   sumvar=sum(totalsales)*12
