@@ -718,7 +718,8 @@ async def update_invoice(payload: Request):
   values_dict = await payload.json()
   #open DB
   dbase = sqlite3.connect('database_group43.db', isolation_level=None)
-
+  ref=dbase.execute("PRAGMA foreign_keys = 1")
+  print(ref)  
 #payload: 
  # {
  #"Customer_ID"              : "1",
@@ -882,13 +883,6 @@ async def update_invoice(payload: Request):
 #------------------------ANALYTICS---------------------
 #------------------------ANALYTICS---------------------
 
-
-
-
-
-
-
-
 #---------------GET MRR ------------------------
 
 @app.get("/ask_mrr")
@@ -896,7 +890,10 @@ async def update_invoice(payload: Request):
   values_dict = await payload.json()
   #open DB
   dbase = sqlite3.connect('database_group43.db', isolation_level=None)
+  ref=dbase.execute("PRAGMA foreign_keys = 1")
+  print(ref)  
 
+#to get product details and quantity
   query_product='''
                 SELECT Company.Company_ID, Product.Product_ID, Product.Product_CurrencyCode, Product.Product_Price, Quote.Quote_Quantity   
                 FROM Product
@@ -919,28 +916,23 @@ async def update_invoice(payload: Request):
   quotequantity=[]
 
 
-
+#to only print product details in terminal 
   for i in dbase.execute(query_product).fetchall():
     productid.append(i[1])
-
   for i in dbase.execute(query_product).fetchall():
     productcurrency.append(i[2])
-
-
   for i in dbase.execute(query_product).fetchall():
     productprice.append(i[3])
-
-  
   for i in dbase.execute(query_product).fetchall():
     quotequantity.append(i[4])
-
   print(productid,productcurrency,productprice,quotequantity)
 
-  currencies_and_sum = {str(row[2]): 0 for row in test_query}
-  for row in test_query:
-    currencies_and_sum[str(row[2])] += row[3] * row[4]
+#to create a dictionary and summing all the amounts corresponding to their currency code
+  currencies_and_sum = {str(column[2]): 0 for column in test_query}
+  for column in test_query:
+    currencies_and_sum[str(column[2])] += column[3] * column[4]
 
-
+#to iterate through list and use external API to iterate and convert
   totalsales=[]
   for cur in list(currencies_and_sum.items()):
     print(str(cur[0]),cur[1])
