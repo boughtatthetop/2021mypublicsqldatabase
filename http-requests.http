@@ -80,7 +80,7 @@ Content-Type: application/json
 
 {
  "Customer_ID"              : "2",
- "Subscription_ID"          : "9"
+ "Subscription_ID"          : "1"
 }
 ###
 
@@ -92,7 +92,7 @@ Content-Type: application/json
 
 {
  "Customer_ID"              : "2",
- "Subscription_ID"          : "2",
+ "Subscription_ID"          : "1",
  "Invoice_PaidDate"         : "2021-01-02"
 }
 ###

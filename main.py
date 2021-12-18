@@ -733,6 +733,7 @@ async def update_invoice(payload: Request):
                         FROM Invoice
                         WHERE Customer_ID={Customer_ID}
                         AND Subscription_ID={Subscription_ID}
+                        AND Invoice_Paid=0
                         '''.format(
                           Customer_ID=str(values_dict['Customer_ID']),
                           Subscription_ID=str(values_dict['Subscription_ID']))
@@ -740,12 +741,17 @@ async def update_invoice(payload: Request):
   a=dbase.execute(query_invoice_update).fetchall()
   print(a)
 
+  if len(a)==0:
+    print('No invoice left to pay')
+    return 'No invoice left to pay'
+
   paidstatusornot=a[0][1]
   print(paidstatusornot)
   
   if paidstatusornot==1:
     print('This invoice has already been paid')
     return 'This invoice has already been paid'
+
 
   invoiceid=a[0][0]
 
@@ -760,6 +766,7 @@ async def update_invoice(payload: Request):
                           Invoice_ID=str(invoiceid))
   print(query_invoice_update)
   dbase.execute(query_invoice_update)
+
 
 
   customer_email_query='''SELECT Customer_Email FROM Customer 
@@ -777,6 +784,8 @@ async def update_invoice(payload: Request):
   name=query_customer_name_surname[0][0]
   surname=query_customer_name_surname[0][1]
   customeremail=query_customer_name_surname[0][2]
+  pandasprint = pd.read_sql_query(query_name, dbase)
+  print(pandasprint)
 
 
   query_productid='''SELECT Subscription.Product_ID
@@ -785,7 +794,8 @@ async def update_invoice(payload: Request):
                   WHERE Subscription.Subscription_ID={Subscription_ID}
                   '''.format(Subscription_ID=str(values_dict['Subscription_ID']))
   productid=dbase.execute(query_productid).fetchall()[0][0]
-
+  pandasprint = pd.read_sql_query(query_productid, dbase)
+  print(pandasprint)
 
   query_prduct='''  
               SELECT Product_Name,Product_CurrencyCode,Product_Price 
@@ -798,7 +808,8 @@ async def update_invoice(payload: Request):
   productname=product[0][0]
   productcurrency=product[0][1]
   productprice=product[0][2]  
-
+  pandasprint = pd.read_sql_query(query_prduct, dbase)
+  print(pandasprint)
 
   get_quote=''' 
       SELECT Quote_ID FROM Quote 
@@ -810,6 +821,8 @@ async def update_invoice(payload: Request):
   print(get_quote)
   quoteid=dbase.execute(get_quote).fetchall()[0][0]
   print(quoteid)
+  pandasprint = pd.read_sql_query(get_quote, dbase)
+  print(pandasprint)
 
   query_quote='''
             SELECT Quote_Quantity, Quote_Date
@@ -817,6 +830,8 @@ async def update_invoice(payload: Request):
             WHERE Quote_ID = {Quote_ID}
             '''.format(Quote_ID=str(quoteid))
   quantity=dbase.execute(query_quote).fetchall()[0][0]
+  pandasprint = pd.read_sql_query(query_quote, dbase)
+  print(pandasprint)
 
   today = (pd.Timestamp.today()).date() 
   print(today) 
@@ -833,6 +848,10 @@ async def update_invoice(payload: Request):
   dbase.execute(query_invoice_status)
   invoicestate=dbase.execute(query_invoice_status).fetchall()[0][0]
   print(invoicestate)
+  pandasprint = pd.read_sql_query(query_invoice_status, dbase)
+  print(pandasprint)
+
+  invoicepaidyes=None
 
   if invoicestate is None:
     print("Invoice number {} has not been paid".format(invoiceid))
@@ -908,6 +927,8 @@ async def update_invoice(payload: Request):
   print(query_product)
   test_query=dbase.execute(query_product).fetchall()
   print(test_query)
+  pandasprint = pd.read_sql_query(query_product, dbase)
+  print(pandasprint)
   
   companyid=str(values_dict['Company_ID'])
   productid=[]
@@ -1014,6 +1035,8 @@ async def update_invoice(payload: Request):
   print(query_product)
   test_query=dbase.execute(query_product).fetchall()
   print(test_query)
+  pandasprint = pd.read_sql_query(query_product, dbase)
+  print(pandasprint)
   
   companyid=str(values_dict['Company_ID'])
   productid=[]
@@ -1119,6 +1142,8 @@ async def update_invoice(payload: Request):
   print(query_product)
   test_query=dbase.execute(query_product).fetchall()
   print(test_query)
+  pandasprint = pd.read_sql_query(query_product, dbase)
+  print(pandasprint)
   
   companyid=str(values_dict['Company_ID'])
   
@@ -1145,6 +1170,8 @@ async def update_invoice(payload: Request):
   print(query_product)
   test_query=dbase.execute(query_product).fetchall()
   print(test_query)
+  pandasprint = pd.read_sql_query(query_product, dbase)
+  print(pandasprint)
 
 #to create a dictionary and summing all the amounts corresponding to their currency code
   currencies_and_sum = {str(row[2]): 0 for row in test_query}
@@ -1202,13 +1229,14 @@ async def update_invoice(payload: Request):
   test_query=dbase.execute(query_customer).fetchall()
   print(test_query)
   results = pd.read_sql_query(query_customer, dbase)
+  
   print(results)
 
- 
+  resultsjson=results.to_json(orient='columns') 
+  print(resultsjson)
 
- 
   dbase.close()
-  return True
+  return resultsjson
 
 
 
