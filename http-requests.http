@@ -46,7 +46,7 @@ Content-Type: application/json
  "Product_Name"               : "product2",
  "Product_CurrencyCode"       : "USD",
  "Product_Price"              : "2",
- "Company_VATID"              : "vatid2"
+ "Company_VATID"              : "vatid1"
 }
 
 ###
@@ -56,7 +56,7 @@ POST http://127.0.0.1:8000/create_quote HTTP/1.1
 Content-Type: application/json
 
 {
- "Product_ID"                   : "1",
+ "Product_ID"                   : "2",
  "Quote_Quantity"               : "4",
  "Quote_Date"                   : "2021-01-04",
  "Customer_Email"               : "email2@gmail.com"
@@ -69,7 +69,7 @@ POST http://127.0.0.1:8000/accept_quote HTTP/1.1
 Content-Type: application/json
 
 {
- "Quote_ID"               : "1",
+ "Quote_ID"               : "3",
  "Customer_ID"              : "2"
 }
 ###
@@ -80,7 +80,7 @@ Content-Type: application/json
 
 {
  "Customer_ID"              : "2",
- "Subscription_ID"          : "2"
+ "Subscription_ID"          : "9"
 }
 ###
 

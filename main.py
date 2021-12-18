@@ -556,19 +556,24 @@ async def create_invoice(payload: Request):
   dbase = sqlite3.connect('database_group43.db', isolation_level=None)
   ref=dbase.execute("PRAGMA foreign_keys = 1")
   print(ref)  
-      
-  values=str(values_dict['Subscription_ID'])
-  subscriptionid=values[0][0]
 
+#payload
+  #{
+  #"Customer_ID"              : "2",
+  #"Subscription_ID"          : "2"
+  #}
+
+#Getting the company_ID by Subscription_ID
   get_companyid=''' 
       SELECT Subscription.Company_ID FROM Subscription 
       WHERE Subscription_ID={Subscription_ID}
       '''.format(
-               Subscription_ID=str(subscriptionid))
+               Subscription_ID=str(values_dict['Subscription_ID']))
   print(get_companyid)
   
   comapnyid=dbase.execute(get_companyid).fetchall()[0][0]
 
+#Inserting into Invoice and setting the PAID=0
   query_insert_invoice='''
                     INSERT INTO Invoice(
                       Customer_ID,
@@ -579,7 +584,7 @@ async def create_invoice(payload: Request):
                     VALUES({Customer_ID},{Subscription_ID},{Company_ID},{Invoice_Paid})       
                     '''.format(
                       Customer_ID=str(values_dict['Customer_ID']),
-                      Subscription_ID=str(subscriptionid),
+                      Subscription_ID=str(values_dict['Subscription_ID']),
                       Company_ID=str(comapnyid),
                       Invoice_Paid=0
                     )
@@ -587,43 +592,25 @@ async def create_invoice(payload: Request):
   insert_invoice=dbase.execute(query_insert_invoice).fetchall()
   print(insert_invoice)
 
+
+
+
+#retrieve data for API feedback
   query_product_id='''SELECT Product_ID
                 FROM Subscription
                 WHERE Subscription_ID="{Subscription_ID}"
-                '''.format(Subscription_ID=str(subscriptionid))
+                '''.format(Subscription_ID=str(values_dict['Subscription_ID']))
   query_product_id_result=dbase.execute(query_product_id).fetchall()
   productid=query_product_id_result[0][0]
 
-
-  query_name='''SELECT Customer.Customer_Name, Customer.Customer_Surname
+  query_name='''SELECT Customer.Customer_Name, Customer.Customer_Surname, Customer.Customer_Email
                 FROM Customer
                 WHERE Customer_ID="{Customer_ID}"
                 '''.format(Customer_ID=str(values_dict['Customer_ID']))
   query_customer_name_surname=dbase.execute(query_name).fetchall()
   name=query_customer_name_surname[0][0]
   surname=query_customer_name_surname[0][1]
-
-  query_name='''SELECT Customer.Customer_Name, Customer.Customer_Surname
-                FROM Customer
-                WHERE Customer_ID="{Customer_ID}"
-                '''.format(Customer_ID=str(values_dict['Customer_ID']))
-  query_customer_name_surname=dbase.execute(query_name).fetchall()
-  name=query_customer_name_surname[0][0]
-  surname=query_customer_name_surname[0][1]
-
-
-
-  customer_email_query='''SELECT Customer_Email FROM Customer 
-                          WHERE Customer_ID={Customer_ID}'''.format(
-                            Customer_ID=str(values_dict['Customer_ID']))
-  customeremail=dbase.execute(customer_email_query).fetchall()[0][0]
-  query_name='''SELECT Customer.Customer_Name, Customer.Customer_Surname
-                FROM Customer
-                WHERE Customer_ID="{Customer_ID}"
-                '''.format(Customer_ID=str(values_dict['Customer_ID']))
-  query_customer_name_surname=dbase.execute(query_name).fetchall()
-  name=query_customer_name_surname[0][0]
-  surname=query_customer_name_surname[0][1]
+  customeremail=query_customer_name_surname[0][2]
 
   query_prduct='''  
               SELECT Product_Name,Product_CurrencyCode,Product_Price 
@@ -664,28 +651,11 @@ async def create_invoice(payload: Request):
             WHERE Quote_ID = {Quote_ID}
             '''.format(Quote_ID=str(quoteid))
   quantity=dbase.execute(query_quote).fetchall()[0][0]
-
+  
   thismonthslastday = pd.Period(pd.Timestamp.today().strftime('%Y-%m-%d'),freq='M').end_time.date() 
   print(thismonthslastday) 
-  
-  customer_email_query='''SELECT Customer_Email FROM Customer 
-                          WHERE Customer_ID={Customer_ID}'''.format(
-                            Customer_ID=str(values_dict['Customer_ID']))
-  customeremail=dbase.execute(customer_email_query).fetchall()[0][0]
-  print(customeremail)
 
-
-  query_prduct='''  
-              SELECT Product_Name,Product_CurrencyCode,Product_Price 
-              FROM Product
-              WHERE Product_ID={Product_ID}
-              '''.format(
-                Product_ID=str(productid))
-  product=dbase.execute(query_prduct).fetchall()
-  productname=product[0][0]
-
-
-
+#to give feedback to API 
   inovicedetails={
    'Customer_Email'           :   str(customeremail),            
    'Customer_Name'            :   str(name),     
@@ -697,13 +667,9 @@ async def create_invoice(payload: Request):
   "Total amount"              : float(productprice)*1.21*float(quantity),
   "Quote_Quantity"             : int(quantity),
   "Due_Date"                 : str(thismonthslastday)
-
-
   } 
-
  
   print(json.dumps(inovicedetails, indent = 3))
-
 
   dbase.close()     
   return inovicedetails 
@@ -753,7 +719,14 @@ async def update_invoice(payload: Request):
   #open DB
   dbase = sqlite3.connect('database_group43.db', isolation_level=None)
 
+#payload: 
+ # {
+ #"Customer_ID"              : "1",
+ #"Subscription_ID"          : "1",
+ #"Invoice_PaidDate"         : "2021-01-02"
+ # }
 
+#to get invoice paid or not
   query_invoice_update='''
                         SELECT Invoice.Invoice_ID, Invoice.Invoice_Paid 
                         FROM Invoice
@@ -769,29 +742,13 @@ async def update_invoice(payload: Request):
   paidstatusornot=a[0][1]
   print(paidstatusornot)
   
-
-  if not paidstatusornot:
-    print("Customer doesn't have any pending Invoice")
-    return "Customer doesn't have any pending Invoice"
-  elif paidstatusornot==1:
+  if paidstatusornot==1:
     print('This invoice has already been paid')
-  elif paidstatusornot==0:
-    return True
-  elif paidstatusornot is None:
-    return True
-
-
+    return 'This invoice has already been paid'
 
   invoiceid=a[0][0]
 
-  customer_email_query='''SELECT Customer_Email FROM Customer 
-                          WHERE Customer_ID={Customer_ID}'''.format(
-                            Customer_ID=str(values_dict['Customer_ID']))
-  customeremail=dbase.execute(customer_email_query).fetchall()[0][0]
-  print(customeremail)
-  
-  
-  
+#to update invoice to PAID 
   query_invoice_update='''
                         UPDATE Invoice
                         SET Invoice_Paid=1,
@@ -803,13 +760,22 @@ async def update_invoice(payload: Request):
   print(query_invoice_update)
   dbase.execute(query_invoice_update)
 
-  query_name='''SELECT Customer.Customer_Name, Customer.Customer_Surname
+
+  customer_email_query='''SELECT Customer_Email FROM Customer 
+                          WHERE Customer_ID={Customer_ID}'''.format(
+                            Customer_ID=str(values_dict['Customer_ID']))
+  customeremail=dbase.execute(customer_email_query).fetchall()[0][0]
+  print(customeremail)
+
+#getting data for API feedback
+  query_name='''SELECT Customer.Customer_Name, Customer.Customer_Surname, Customer.Customer_Email
                 FROM Customer
                 WHERE Customer_ID="{Customer_ID}"
                 '''.format(Customer_ID=str(values_dict['Customer_ID']))
   query_customer_name_surname=dbase.execute(query_name).fetchall()
   name=query_customer_name_surname[0][0]
   surname=query_customer_name_surname[0][1]
+  customeremail=query_customer_name_surname[0][2]
 
 
   query_productid='''SELECT Subscription.Product_ID
@@ -818,7 +784,6 @@ async def update_invoice(payload: Request):
                   WHERE Subscription.Subscription_ID={Subscription_ID}
                   '''.format(Subscription_ID=str(values_dict['Subscription_ID']))
   productid=dbase.execute(query_productid).fetchall()[0][0]
-
 
 
   query_prduct='''  
@@ -830,6 +795,9 @@ async def update_invoice(payload: Request):
                 Product_ID=str(productid))
   product=dbase.execute(query_prduct).fetchall()
   productname=product[0][0]
+  productcurrency=product[0][1]
+  productprice=product[0][2]  
+
 
   get_quote=''' 
       SELECT Quote_ID FROM Quote 
@@ -839,20 +807,18 @@ async def update_invoice(payload: Request):
         Customer_ID = str(values_dict["Customer_ID"]),
         Product_ID=str(productid))
   print(get_quote)
-
-
-  productcurrency=product[0][1]
-  productprice=product[0][2]  
   quoteid=dbase.execute(get_quote).fetchall()[0][0]
   print(quoteid)
+
   query_quote='''
             SELECT Quote_Quantity, Quote_Date
             FROM Quote
             WHERE Quote_ID = {Quote_ID}
             '''.format(Quote_ID=str(quoteid))
   quantity=dbase.execute(query_quote).fetchall()[0][0]
-  thismonthslastday = (pd.Timestamp.today()).date() 
-  print(thismonthslastday) 
+
+  today = (pd.Timestamp.today()).date() 
+  print(today) 
 
   query_invoice_status='''
                         SELECT Invoice_Paid
@@ -870,14 +836,14 @@ async def update_invoice(payload: Request):
   if invoicestate is None:
     print("Invoice number {} has not been paid".format(invoiceid))
     invoicepaidyes=invoicestate
+    return "Invoice has not been paid"
   elif not invoicestate:
     print(" This customer invoice does not exists") 
+    return " This customer invoice does not exists"
   elif invoicestate==1:
     invoicepaidyes="Paid"
     print("The invoice has been paid")
-
-
-
+    return "The invoice has been paid"
 
   paidinvoice={
    'Customer_Email'           :   customeremail,            
@@ -889,18 +855,12 @@ async def update_invoice(payload: Request):
     "Product_Price_VAT_Included" :float(productprice)*1.21,
     "Total amount"              : float(productprice)*1.21*float(quantity),
     "Quote_Quantity"             : int(quantity),
-    "Paid_Date"                 : str(thismonthslastday),
-    "Paid status"         : str(invoicepaidyes)
-
-
-
+    "Paid_Date"                 : str(today),
+    "Paid status"         : str(invoicepaidyes),
+    "Paid_date"           : str(values_dict['Invoice_PaidDate'])
   } 
 
- 
   print(json.dumps(paidinvoice, indent = 3))
-
-
-
 
   dbase.close()
   return paidinvoice
