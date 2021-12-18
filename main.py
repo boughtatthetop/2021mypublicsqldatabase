@@ -230,19 +230,20 @@ async def review_product(payload: Request):
 
   query_companyid='''SELECT Company_ID 
                   FROM Company 
-                  WHERE Company_VATID=?
-                  '''
+                  WHERE Company_VATID="{Company_VATID}"
+                  '''.format(Company_VATID=str(values_dict['Company_VATID']))
   print(query_companyid)
-  companyid=dbase.execute(query_companyid, (values_dict['Company_VATID'],)).fetchall()
-  print(companyid)
+  companyidlist=dbase.execute(query_companyid).fetchall()
+  print(companyidlist)
 
 
   
-  if not companyid:
-      print("This company does not exists in our databse")
-  else:
-      print(companyid[0][0])
-  
+  if not companyidlist:
+      return "This company does not exists in our databse"
+
+  companyid=companyidlist[0][0]
+
+
   query_new_product='''
                 INSERT INTO Product(
                   Product_Name,
