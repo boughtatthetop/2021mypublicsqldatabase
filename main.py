@@ -9,7 +9,7 @@ import pandas as pd
 import datetime
 import json
 import requests
-from database_rest_and_creation import Subscription_ID
+#from database_rest_and_creation import Subscription_ID
 from exchangerateAPI import converter 
 
 app = FastAPI()
@@ -29,7 +29,9 @@ def root():
 
 
 
-#--------REQUIREMENT NUMBER 1 = COMPANY CREATE ACCOUNT ------------------ #--------REQUIREMENT NUMBER 1 = COMPANY CREATE ACCOUNT ------------------ #--------REQUIREMENT NUMBER 1 = COMPANY CREATE ACCOUNT ------------------ 
+#--------REQUIREMENT NUMBER 1 = COMPANY CREATE ACCOUNT ------------------ 
+#--------REQUIREMENT NUMBER 1 = COMPANY CREATE ACCOUNT ------------------ 
+#--------REQUIREMENT NUMBER 1 = COMPANY CREATE ACCOUNT ------------------ 
 #--------REQUIREMENT NUMBER 1 = COMPANY CREATE ACCOUNT ------------------ 
 #--------REQUIREMENT NUMBER 1 = COMPANY CREATE ACCOUNT ------------------ 
 #--------REQUIREMENT NUMBER 1 = COMPANY CREATE ACCOUNT ------------------ 
@@ -38,6 +40,8 @@ def root():
 async def create_company_account(payload: Request):
   values_dict = await payload.json()
   dbase = sqlite3.connect('database_group43.db', isolation_level=None)
+  ref=dbase.execute("PRAGMA foreign_keys = 1")
+  print(ref)
   companies_with_this_vat=dbase.execute('''
     SELECT Company_ID FROM Company
     WHERE Company_VATID=?
@@ -72,7 +76,10 @@ async def create_company_account(payload: Request):
                           str(values_dict["Company_BankAccName"]),
                           str(values_dict["Company_BankAccNumber"])))
   
+
+
   companyrecorded={
+
   "Company_Name": str(values_dict["Company_Name"]), 
    "Company_AddressCountry":   str(values_dict["Company_AddressCountry"]), 
    "Company_AddressState"  :  str(values_dict["Company_AddressState"]),
@@ -118,6 +125,8 @@ async def create_customer_account(payload: Request):
   values_dict = await payload.json()
   #open DB 
   dbase = sqlite3.connect('database_group43.db', isolation_level=None)
+  ref=dbase.execute("PRAGMA foreign_keys = 1")
+  print(ref)
   
   customers_with_this_email=dbase.execute('''
     SELECT Customer_ID FROM Customer
@@ -142,6 +151,7 @@ async def create_customer_account(payload: Request):
   dbase.execute('''
         INSERT INTO Customer(
         Customer_Email,
+        Customer_Birthdate,
         Customer_Name,
         Customer_Surname,
         Customer_AddressCountry,
@@ -151,10 +161,11 @@ async def create_customer_account(payload: Request):
         Customer_AddressNumber,
         Customer_AddressPostCode, 
         Customer_CCNumber)
-        VALUES(?,?,?,?,?,?,?,?,?,?)'''
+        VALUES(?,?,?,?,?,?,?,?,?,?,?)'''
         ,
         (
           str(values_dict['Customer_Email']),
+          str(values_dict['Customer_Birthdate']),
           str(values_dict['Customer_Name']),
           str(values_dict['Customer_Surname']),
           str(values_dict['Customer_AddressCountry']),
@@ -167,16 +178,17 @@ async def create_customer_account(payload: Request):
   dbase.close()
 
   customerrecorder={
-   'Customer_Email'           :           str(values_dict['Customer_Email']),            
-   'Customer_Name'            :           str(values_dict['Customer_Name']),     
-   'Customer_Surname'         :           str(values_dict['Customer_Surname']),   
-   'Customer_AddressCountry'  :           str(values_dict['Customer_AddressCountry']),               
-   'Customer_AddressState'    :           str(values_dict['Customer_AddressState']),           
-   'Customer_AddressCity'     :           str(values_dict['Customer_AddressCity']),       
-   'Customer_AddressStreet'   :           str(values_dict['Customer_AddressStreet']),        
-   'Customer_AddressNumber'   :           str(values_dict['Customer_AddressNumber']),            
-   'Customer_AddressPostCode' :           str(values_dict['Customer_AddressPostCode']),                
-   'Customer_CCNumber'        :           str(values_dict['Customer_CCNumber'])     
+    'Customer_Email'           :           str(values_dict['Customer_Email']),
+    'Customer_Birthdate'       :           str(values_dict['Customer_Birthdate']),            
+    'Customer_Name'            :           str(values_dict['Customer_Name']),     
+    'Customer_Surname'         :           str(values_dict['Customer_Surname']),   
+    'Customer_AddressCountry'  :           str(values_dict['Customer_AddressCountry']),               
+    'Customer_AddressState'    :           str(values_dict['Customer_AddressState']),           
+    'Customer_AddressCity'     :           str(values_dict['Customer_AddressCity']),       
+    'Customer_AddressStreet'   :           str(values_dict['Customer_AddressStreet']),        
+    'Customer_AddressNumber'   :           str(values_dict['Customer_AddressNumber']),            
+    'Customer_AddressPostCode' :           str(values_dict['Customer_AddressPostCode']),                
+    'Customer_CCNumber'        :           str(values_dict['Customer_CCNumber'])     
   }
 
   print(json.dumps(customerrecorder, indent = 3))
@@ -195,22 +207,42 @@ async def create_customer_account(payload: Request):
 
 
 
+#---------------Create a product------------------
+#---------------Create a product------------------
+#---------------Create a product------------------
+#---------------Create a product------------------
+#---------------Create a product------------------
+#---------------Create a product------------------
+#---------------Create a product------------------
+#---------------Create a product------------------
 
-#---------------REQUIREMENT NUMBER 3 = COMPANY Creates A QUOTE------------------
-#---------------REQUIREMENT NUMBER 3 = COMPANY Creates A QUOTE------------------
-#---------------REQUIREMENT NUMBER 3 = COMPANY Creates A QUOTE------------------
-#---------------REQUIREMENT NUMBER 3 = COMPANY Creates A QUOTE------------------
-#---------------REQUIREMENT NUMBER 3 = COMPANY Creates A QUOTE------------------
-#---------------REQUIREMENT NUMBER 3 = COMPANY Creates A QUOTE------------------
-#---------------REQUIREMENT NUMBER 3 = COMPANY Creates A QUOTE------------------
-#---------------REQUIREMENT NUMBER 3 = COMPANY Creates A QUOTE------------------
 
-@app.post("/create_quote")
-async def review_quote(payload: Request):
+@app.post("/create_product")
+async def review_product(payload: Request):
   values_dict = await payload.json()
   #open DB
   dbase = sqlite3.connect('database_group43.db', isolation_level=None)
+  ref=dbase.execute("PRAGMA foreign_keys = 1")
+  print(ref)
   #To post a quote company enters its product details and id
+  
+  #Finding Company in our database
+
+  query_companyid='''SELECT Company_ID 
+                  FROM Company 
+                  WHERE Company_VATID=?
+                  '''
+  print(query_companyid)
+  companyid=dbase.execute(query_companyid, (values_dict['Company_VATID'],)).fetchall()
+  print(companyid)
+
+
+  
+  if not companyid:
+      print("This company does not exists in our databse")
+  else:
+      print(companyid[0][0])
+  
   query_new_product='''
                 INSERT INTO Product(
                   Product_Name,
@@ -229,36 +261,56 @@ async def review_quote(payload: Request):
                   Product_Name=str(values_dict['Product_Name']),
                   Product_CurrencyCode=str(values_dict['Product_CurrencyCode']),
                   Product_Price=str(values_dict['Product_Price']),
-                  Company_ID=str(values_dict['Company_ID'])
+                  Company_ID=str(companyid)
                 )
   dbase.execute(query_new_product)
 
+  dbase.close()
+  return "New Product has been recorded "
 
 
 
 
-  #---Filter for product_id using name, currency, price and company 
-  query_product='''
-                SELECT Product_ID FROM Product
-                WHERE Product_Name="{Product_Name}"
-                AND Product_CurrencyCode="{Product_CurrencyCode}"
-                AND Product_Price ={Product_Price}
-                AND Company_ID={Company_ID}
-                '''.format(
-                      Product_Name=str(values_dict['Product_Name']),
-                      Product_CurrencyCode=str(values_dict['Product_CurrencyCode']),
-                      Product_Price =str(values_dict['Product_Price']),
-                      Company_ID=str(values_dict['Company_ID']))
-  
-  print(query_product)
-  test_query=dbase.execute(query_product).fetchall()
-  print(test_query)
-  #if test_query:
-  #  return "Company doesn't have that product"
-  #  
-  #else:
-  productid=dbase.execute(query_product).fetchall()[0][0]
-  print("productid = " + str(productid))
+
+
+
+
+
+
+
+
+
+
+
+
+
+#---------------REQUIREMENT NUMBER 3 = COMPANY Creates A QUOTE------------------
+#---------------REQUIREMENT NUMBER 3 = COMPANY Creates A QUOTE------------------
+#---------------REQUIREMENT NUMBER 3 = COMPANY Creates A QUOTE------------------
+#---------------REQUIREMENT NUMBER 3 = COMPANY Creates A QUOTE------------------
+#---------------REQUIREMENT NUMBER 3 = COMPANY Creates A QUOTE------------------
+#---------------REQUIREMENT NUMBER 3 = COMPANY Creates A QUOTE------------------
+#---------------REQUIREMENT NUMBER 3 = COMPANY Creates A QUOTE------------------
+#---------------REQUIREMENT NUMBER 3 = COMPANY Creates A QUOTE------------------
+@app.post("/create_quote")
+async def review_quote(payload: Request):
+  values_dict = await payload.json()
+  #open DB
+  dbase = sqlite3.connect('database_group43.db', isolation_level=None)
+
+
+  #Finding Product in our database
+  query_prduct='''  
+              SELECT Product_Name,Product_CurrencyCode,Product_Price 
+              FROM Product
+              WHERE Product_ID={Product_ID}
+              '''.format(
+              
+                Product_ID=str(values_dict['Product_ID']))
+  product=dbase.execute(query_prduct).fetchall()
+  productname=product[0][0]
+  productcurrency=product[0][1]
+  productprice=product[0][2]  
 
 
 #--- filter for cusomter_id using the email
@@ -293,10 +345,8 @@ async def review_quote(payload: Request):
                   {Company_ID})'''.format(
                     Quote_Quantity=str(values_dict['Quote_Quantity']),
                     Quote_Date=str(values_dict['Quote_Date']),
-                    Product_ID=str(productid),
-                    Customer_ID=str(customerid),
-                    Company_ID=str(values_dict['Company_ID'])
-                  )
+                    Product_ID=str(values_dict['Product_ID']),
+                    Customer_ID=str(customerid))
   print(query_quote)
   results_quote=(dbase.execute(query_quote).fetchall())
   print(results_quote)

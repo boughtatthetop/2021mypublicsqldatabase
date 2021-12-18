@@ -156,10 +156,10 @@ dbase.execute('''
     CREATE TABLE IF NOT EXISTS Subscription(
         Subscription_ID             INTEGER PRIMARY KEY AUTOINCREMENT,
         
-        Subscription_Active         BOOLEAN,
-        Quote_ID                    INTEGER,
-        Customer_ID                 INTEGER,
-        Product_ID                  INTEGER,
+        Subscription_Active         BOOLEAN NOT NULL,
+        Quote_ID                    INTEGER NOT NULL,
+        Customer_ID                 INTEGER NOT NULL,
+        Product_ID                  INTEGER NOT NULL,
         Company_ID                  INTEGER NOT NULL, 
         
         FOREIGN KEY(Company_ID)REFERENCES Company(Company_ID), 
@@ -174,10 +174,10 @@ dbase.execute('''
     CREATE TABLE IF NOT EXISTS Invoice(
         Invoice_ID                  INTEGER PRIMARY KEY AUTOINCREMENT,
         
-        Invoice_Paid                BOOLEAN,
-        Invoice_PaidDate            DATE,      
-        Customer_ID                 INTEGER,
-        Subscription_ID             INTEGER,
+        Invoice_Paid                BOOLEAN NOT NULL,
+        Invoice_PaidDate            DATE    NOT NULL,       
+        Customer_ID                 INTEGER NOT NULL,
+        Subscription_ID             INTEGER NOT NULL,
         Company_ID                  INTEGER NOT NULL, 
         
         FOREIGN KEY(Company_ID)REFERENCES Company(Company_ID),
